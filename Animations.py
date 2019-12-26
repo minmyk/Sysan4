@@ -1,5 +1,16 @@
+import copy
+from matplotlib import animation
+from IPython.display import display, clear_output
+import sys, os, random
+from PyQt5 import QtCore
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5 import QtCore, QtGui, QtWidgets
+import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+import matplotlib.animation as animation
 
 
 class MyMplCanvas(FigureCanvas):

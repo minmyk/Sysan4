@@ -23,9 +23,7 @@ class PowersThread(QThread):
         y = scale_y.fit_transform(yd)
         if is_multi:
             x = np.log(x + 2)
-        sample = precision(y[:, : data[4]], x, kind, numbers, is_multi)
         self.window.poly.setEnabled(True)
-        self.window.results.setText(str(sample))
 
 
 class UI(QDialog):
@@ -88,7 +86,7 @@ class UI(QDialog):
         self.mainLayout.addWidget(self.topMidGroupBox, 0, 1)
         self.mainLayout.addWidget(self.topMid2GroupBox, 0, 3)
         self.mainLayout.addWidget(self.topRightGroupBox, 0, 2)
-        #self.mainLayout.addWidget(self.topRightGroupBox, 0, 5)
+        # self.mainLayout.addWidget(self.topRightGroupBox, 0, 5)
         self.mainLayout.addWidget(self.bottomTabWidget, 2, 0, 1, 4)
         self.mainLayout.addWidget(self.canvas1, 0, 4)
         self.mainLayout.addWidget(self.canvas2, 2, 4)
@@ -356,26 +354,12 @@ class UI(QDialog):
             variables = set_vars(orders, numbers, x)
             lamb = fit(pol, y[:, t])
             psy = set_psy(lamb, numbers, orders, pol, is_multi, min_poly)
-            print('psy')
-            print(psy)
             a = fit(psy, y[:, t])
             fs = set_f(a, numbers, psy, is_multi, min_poly)
-            print('fs')
-            print(fs)
-            c = fit(fs, y[:, t])
-            coef = fit(variables, y[:, t])
 
             visualize(y[:, t], pol, lamb, t, kind, y_scales[t], self.normalize.isChecked(), is_multi, min_poly,
                       error(y[:, t], pol, lamb, is_multi))
-            self.Btable.append("Y" + str(t + 1) + ": ")
-            self.Btable.append("Error = " + str(error(y[:, t], pol, lamb, is_multi)))
-            self.Btable.append("Variables = " + str(show_vars(orders, numbers, coef)))
-            self.Btable.append("Polynoms = " + str(show_apr(kind, orders, numbers, lamb, is_multi)))
-            self.Btable.append("One Variable Functions = " + str(show_psy(numbers, a, is_multi)))
-            self.Btable.append("Vector Functions = " + str(show_f(numbers, c, is_multi)))
-            self.Btable.append(
-                "\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-"
-                "*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*\n")
+
             self.add_tabs(t)
 
         f = open('data/' + data[3] + ".txt", "w+")

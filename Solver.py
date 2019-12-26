@@ -1,10 +1,23 @@
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import rc
-from Optimizer import *
 import warnings
+from itertools import combinations
 
-np.set_printoptions(linewidth=np.inf)
+
+import copy
+from matplotlib import animation
+from IPython.display import display, clear_output
+import sys, os, random
+from PyQt5 import QtCore
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5 import QtCore, QtGui, QtWidgets
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+import matplotlib.animation as animation
 
 
 def memory_saver(f):
@@ -230,177 +243,6 @@ def error(y, x, coefc, is_multi):
     return np.linalg.norm(difference)
 
 
-def precision(y, x, kind, numbers, is_multi):
-    warnings.filterwarnings("ignore")
-
-    def func_to_opt(opt_x, _is_multi=is_multi):
-        i, j, k = opt_x[0], opt_x[1], opt_x[2]
-        pol_ = set_poly(kind, [i, j, k], numbers, x, _is_multi)[0]
-        value = 0
-        for t in range(y.shape[1]):
-            lambd = fit(pol_, y[:, t - 1])
-            value += error(y[:, t - 1], pol_, lambd, _is_multi)
-        return value
-
-    ga_holder = GeneticAlgorithm(initial_generation=np.random.randint(low=2, high=15, size=(5, 3)),
-                                 scale=5,
-                                 target_function=lambda l: func_to_opt(l),
-                                 populations_to_take=2,
-                                 precision=1e-8
-                                 )
-    result = ga_holder.fit()
-    result = result['best_points'][-1]
-    return result[0], result[1], result[2]
-
-
-def show_apr(mode, orders, numbers, coefc, is_multi):
-    if mode == 'Chebyshev':
-        pol = 'T'
-    elif mode == 'Legendre':
-        pol = 'Leg'
-    elif mode == 'Hermite':
-        pol = 'H'
-    elif mode == 'Laguerre':
-        pol = 'Lag'
-    else:
-        pol = 'Error!'
-    sub = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
-    k = 0
-    string = ''
-    if is_multi:
-        for j in range(0, numbers[0]):
-            if j == 0:
-                k += 1
-            for i in range((orders[0])):
-                if coefc[k] < 0:
-                    sign = ''
-                else:
-                    sign = '+'
-                string += "(" + "1 " + sign + str(round(coefc[k], 5)) + (pol + str(i + 1) +
-                                                                         '(x' + str(j + 1) + ')').translate(sub) + ")"
-                k += 1
-        for j in range(numbers[0], numbers[1] + numbers[0]):
-            for i in range((orders[1])):
-                if coefc[k] < 0:
-                    sign = ''
-                else:
-                    sign = '+'
-                string += "(" + "1 " + sign + str(round(coefc[k], 5)) + (pol + str(i + 1) +
-                                                                         '(x' + str(j + 1) + ')').translate(sub) + ")"
-                k += 1
-        for j in range(numbers[1] + numbers[0], numbers[1] + numbers[0] + numbers[2]):
-            for i in range((orders[2])):
-                if coefc[k] < 0:
-                    sign = ''
-                else:
-                    sign = '+'
-                string += "(" + "1 " + sign + str(round(coefc[k], 5)) + (pol + str(i + 1) +
-                                                                         '(x' + str(j + 1) + ')').translate(sub) + ")"
-                k += 1
-    else:
-        for j in range(0, numbers[0]):
-            if j == 0:
-                string += str(round(coefc[k], 5))
-                k += 1
-            for i in range((orders[0])):
-                if coefc[k] < 0:
-                    sign = ''
-                else:
-                    sign = '+'
-                string += sign + str(round(coefc[k], 5)) + str((pol + str(i + 1) +
-                                                                '(x' + str(j + 1) + ')')).translate(sub)
-                k += 1
-        for j in range(numbers[0], numbers[1] + numbers[0]):
-            for i in range((orders[1])):
-                if coefc[k] < 0:
-                    sign = ''
-                else:
-                    sign = '+'
-                string += sign + str(round(coefc[k], 5)) + str((pol + str(i + 1) +
-                                                                '(x' + str(j + 1) + ')')).translate(sub)
-                k += 1
-        for j in range(numbers[1] + numbers[0], numbers[1] + numbers[0] + numbers[2]):
-            for i in range((orders[2])):
-                if coefc[k] < 0:
-                    sign = ''
-                else:
-                    sign = '+'
-                string += sign + str(round(coefc[k], 5)) + str((pol + str(i + 1) +
-                                                                '(x' + str(i + 1) + ')')).translate(sub)
-                k += 1
-    return string
-
-
-def show_vars(orders, numbers, coefc):
-    sub = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
-    k = 0
-    string = ''
-    for j in range(0, numbers[0]):
-        if j == 0:
-            string += str(round(coefc[k], 5))
-            k += 1
-        for i in range((orders[0])):
-            if coefc[k] < 0:
-                sign = ''
-            else:
-                sign = '+'
-            string += sign + str(round(coefc[k], 5)) + 'x' + (str(j + 1)).translate(sub) + '^' + str(str(i + 1))
-            k += 1
-    for j in range(numbers[0], numbers[1] + numbers[0]):
-        for i in range((orders[1])):
-            if coefc[k] < 0:
-                sign = ''
-            else:
-                sign = '+'
-            string += sign + str(round(coefc[k], 5)) + 'x' + (str(j + 1)).translate(sub) + '^' + str(str(i + 1))
-            k += 1
-    for j in range(numbers[1] + numbers[0], numbers[1] + numbers[0] + numbers[2]):
-        for i in range((orders[2])):
-            if coefc[k] < 0:
-                sign = ''
-            else:
-                sign = '+'
-            string += sign + str(round(coefc[k], 5)) + 'x' + (str(j + 1)).translate(sub) + '^' + str(str(i + 1))
-            k += 1
-    return string
-
-
-def show_psy(numbers, coefc, is_multi):
-    string = ''
-    sub = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
-    if not is_multi:
-        string += str(round(coefc[0], 5))
-    for i in range(1, sum(numbers) + 1):
-        if coefc[i] < 0:
-            sign = ''
-        else:
-            sign = '+'
-        if is_multi:
-            string += "(" + "1 " + sign + str(round(coefc[i], 5)) + ('\u03C8' + str(i) +
-                                                                     '(x' + str(i) + ')').translate(sub) + ")"
-        else:
-            string += sign + str(round(coefc[i], 5)) + ('\u03C8' + str(i) + '(x' + str(i) + ')').translate(sub)
-    return string
-
-
-def show_f(numbers, coefc, is_multi):
-    string = ''
-    sub = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
-    if not is_multi:
-        string += str(round(coefc[0], 5))
-    for i in range(1, len(numbers) + 1):
-        if coefc[i] < 0:
-            sign = ''
-        else:
-            sign = '+'
-        if is_multi:
-            string += "(" + "1 " + sign + str(round(coefc[i], 5)) + ('\u03C6' + str(i) +
-                                                                     '(x' + str(i) + ')').translate(sub) + ")"
-        else:
-            string += sign + str(round(coefc[i], 5)) + ('\u03C6' + str(i) + '(x' + str(i) + ')').translate(sub)
-    return string
-
-
 def visualize(y, x, coefc, t, kind, scaler, normal, is_multi, min_poly, err):
     if is_multi and not normal:
         normal = True
@@ -424,3 +266,71 @@ def visualize(y, x, coefc, t, kind, scaler, normal, is_multi, min_poly, err):
     plt.gca().legend(('Y' + str(t + 1), 'Approximation'))
     plt.title(str(kind) + ' error: ' + str(err))
     plt.savefig('data/fig' + str(t + 1) + '.png', orientation='landscape')
+
+# new lab 4
+
+
+def form_data_animation(x, y, settings, build_window, forecast_window, mode):
+    j = 0
+    y2 = copy.copy(y)
+    y1 = np.array([])
+    for i in range(len(y2) - build_window):
+        if i == j * forecast_window:
+            pol = set_poly(mode, settings[0], settings[1],
+                           x[j * forecast_window: j * forecast_window + build_window], False)
+            lambd = fit(pol, y2[j * forecast_window: j * forecast_window + build_window])  # j * build_window
+
+            ind1 = j * forecast_window + build_window
+            ind2 = min(len(x), (j + 1) * forecast_window + build_window)
+            predicted = predict(lambd, set_poly(mode, settings[0], settings[1], x[ind1:ind2], False)[0], False)
+
+            y1 = np.hstack((y1, predicted))
+            j += 1
+
+    return y1, y2[build_window:]
+
+
+def get_mean(y):
+    if len(y) == 0:
+        return 0
+    return sum(y) / len(y)
+
+
+def get_variance(y):
+    y1 = copy.copy(y)
+    y_mean = get_mean(y1)
+    y1 -= y_mean
+    return sum(y1 ** 2)
+
+
+def crazylation(y, y_forecast):
+    y_mean = get_mean(y)
+    forecast_mean = get_mean(y_forecast)
+    y_centralized = y - y_mean
+    y_forecast_centralized = y_forecast - forecast_mean
+    result = y_centralized @ y_forecast_centralized
+    correlation = np.sqrt(get_variance(y) * get_variance(y_forecast))
+    if correlation == 0:
+        return 0
+    return result / correlation
+
+
+def indicator(y, window):
+    combinat = list(combinations(np.arange(len(y)), 2))
+    indicator_fail = np.zeros((len(combinat), len(y[0]) // window - 1))
+    for i in range(len(y[0]) // window - 2):
+        for j in range(len(combinat)):
+            if crazylation(y[combinat[j][0]][i * window:(i + 1) * window],
+                           y[combinat[j][1]][i * window:(i + 1) * window]) * \
+                    crazylation(y[combinat[j][0]][(i + 1) * window:(i + 2) * window],
+                                y[combinat[j][1]][(i + 1) * window:(i + 2) * window]) < -1 * (2 / (window ** 1.15)):
+                indicator_fail[j][i] = 1
+
+    ind = np.zeros(len(y[0]) // window - 1)
+    for i in range(len(y[0]) // window - 1):
+        tmp = 0
+        for j in range(len(combinat)):
+            tmp += indicator_fail[j][i]
+        if tmp > 0:
+            ind[i] = 1
+    return ind
