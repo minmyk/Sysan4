@@ -86,8 +86,8 @@ class UI(QDialog):
         self.mainLayout.addLayout(self.topLayout, 1, 0, 1, 4)
         self.mainLayout.addWidget(self.topLeftGroupBox, 0, 0)
         self.mainLayout.addWidget(self.topMidGroupBox, 0, 1)
-        self.mainLayout.addWidget(self.topMid2GroupBox, 0, 2)
-        self.mainLayout.addWidget(self.topRightGroupBox, 0, 3)
+        self.mainLayout.addWidget(self.topMid2GroupBox, 0, 3)
+        self.mainLayout.addWidget(self.topRightGroupBox, 0, 2)
         #self.mainLayout.addWidget(self.topRightGroupBox, 0, 5)
         self.mainLayout.addWidget(self.bottomTabWidget, 2, 0, 1, 4)
         self.mainLayout.addWidget(self.canvas1, 0, 4)
@@ -154,6 +154,35 @@ class UI(QDialog):
         self.topLayout.addWidget(self.pause)
         self.topLayout.addWidget(self.reset)
 
+    def create_top_left_group_box(self):
+
+        self.LspinBox.setRange(0, 10000)
+        self.inputs.append(self.LspinBox)
+
+        self.Lline1.setPlaceholderText(' *.txt')
+        self.inputs.append(self.Lline1)
+
+        self.Lline2.setPlaceholderText(' *.txt')
+        self.inputs.append(self.Lline2)
+
+        self.Lline3.setPlaceholderText(' *.txt')
+        self.inputs.append(self.Lline3)
+
+        layout = QGridLayout()
+
+        layout.addWidget(self.Llabel1, 0, 0)
+        layout.addWidget(self.LspinBox, 0, 1)
+        layout.addWidget(self.Llabel2, 1, 0)
+        layout.addWidget(self.Llabel3, 3, 0)
+        layout.addWidget(self.Llabel4, 2, 0)
+        layout.addWidget(self.Lline1, 1, 1)
+        layout.addWidget(self.Lline2, 2, 1)
+        layout.addWidget(self.Lline3, 3, 1)
+
+        # self.topLeftGroupBox.setFixedHeight(190)
+        self.topLeftGroupBox.setFixedWidth(260)
+        self.topLeftGroupBox.setLayout(layout)
+
     def create_top_right_group_box(self):
 
         self.RcomboBox.addItems(["Chebyshev", "Hermite", "Legendre"])
@@ -206,7 +235,7 @@ class UI(QDialog):
         layout.addWidget(self.Mlabel4, 3, 0)
 
         #self.topMidGroupBox.setFixedHeight(190)
-        self.topMidGroupBox.setFixedWidth(160)
+        self.topMidGroupBox.setFixedWidth(200)
 
         self.topMidGroupBox.setLayout(layout)
 
@@ -242,35 +271,6 @@ class UI(QDialog):
 
         self.topMid2GroupBox.setLayout(layout)
 
-    def create_top_left_group_box(self):
-
-        self.LspinBox.setRange(0, 10000)
-        self.inputs.append(self.LspinBox)
-
-        self.Lline1.setPlaceholderText(' *.txt')
-        self.inputs.append(self.Lline1)
-
-        self.Lline2.setPlaceholderText(' *.txt')
-        self.inputs.append(self.Lline2)
-
-        self.Lline3.setPlaceholderText(' *.txt')
-        self.inputs.append(self.Lline3)
-
-        layout = QGridLayout()
-
-        layout.addWidget(self.Llabel1, 0, 0)
-        layout.addWidget(self.LspinBox, 0, 1)
-        layout.addWidget(self.Llabel2, 1, 0)
-        layout.addWidget(self.Llabel3, 3, 0)
-        layout.addWidget(self.Llabel4, 2, 0)
-        layout.addWidget(self.Lline1, 1, 1)
-        layout.addWidget(self.Lline2, 2, 1)
-        layout.addWidget(self.Lline3, 3, 1)
-
-        #self.topLeftGroupBox.setFixedHeight(190)
-        self.topLeftGroupBox.setFixedWidth(220)
-        self.topLeftGroupBox.setLayout(layout)
-
     def add_tabs(self, i):
         tab = QWidget()
         tab.setObjectName("tab_" + str(i + 1))
@@ -296,13 +296,13 @@ class UI(QDialog):
         self.Btable = QTableWidget(self.Btab1)
         self.Btable.setColumnCount(7)
         self.Btable.setRowCount(0)
-        self.Btable.setHorizontalHeaderLabels(["    Time     ",
+        self.Btable.setHorizontalHeaderLabels(["     Time     ",
                                                "           У1           ",
                                                "           У2           ",
                                                "           У3           ",
-                                               "                      Status                      ",
+                                               "                            Status                            ",
                                                "              Danger level              ",
-                                               "               Cause               "])
+                                               "                Cause                "])
         self.Btable.resizeColumnsToContents()
         #self.Btable.
         self.bottomTabWidget = QTabWidget()
