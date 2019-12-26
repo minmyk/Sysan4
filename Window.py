@@ -3,6 +3,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import QThread, Qt, QRect
 from Solver import *
 from sklearn.preprocessing import MinMaxScaler
+from Animations import *
 
 
 class PowersThread(QThread):
@@ -73,6 +74,13 @@ class UI(QDialog):
         self.create_top_right_group_box()
         self.create_bottom_group_box()
         self.create_menu()
+        #
+        self.canvas1 = MyMplCanvas(self, width=9, height=3, dpi=100)
+        self.canvas2 = MyMplCanvas(self, width=6, height=3, dpi=100)
+        self.canvas3 = MyMplCanvas(self, width=6, height=3, dpi=100)
+        self.canvas4 = MyMplCanvas(self, width=6, height=3, dpi=100)
+        self.canvas5 = MyMplCanvas(self, width=6, height=3, dpi=100)
+        #
         self.mainLayout = QGridLayout()
 
         self.mainLayout.addLayout(self.topLayout, 1, 0, 1, 4)
@@ -80,10 +88,14 @@ class UI(QDialog):
         self.mainLayout.addWidget(self.topMidGroupBox, 0, 1)
         self.mainLayout.addWidget(self.topMid2GroupBox, 0, 2)
         self.mainLayout.addWidget(self.topRightGroupBox, 0, 3)
-        self.mainLayout.addWidget(self.topRightGroupBox, 0, 5)
-        self.mainLayout.addWidget(self.topRightGroupBox, 0, 6)
+        #self.mainLayout.addWidget(self.topRightGroupBox, 0, 5)
         self.mainLayout.addWidget(self.bottomTabWidget, 2, 0, 1, 4)
-        self.mainLayout.addWidget(self.bottomTabWidget, 3, 0, 2, 4)
+        self.mainLayout.addWidget(self.canvas1, 0, 4)
+        self.mainLayout.addWidget(self.canvas2, 2, 4)
+        self.mainLayout.addWidget(self.canvas3, 4, 4)
+        self.mainLayout.addWidget(self.canvas4, 4, 0, 1, 2)
+        self.mainLayout.addWidget(self.canvas5, 4, 2, 1, 2)
+        #self.mainLayout.addLayout(self.topLayout, 3, 0, 1, 4)
         self.setLayout(self.mainLayout)
 
         self.change_palette()
