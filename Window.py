@@ -89,11 +89,11 @@ class UI(QDialog):
         # self.mainLayout.addWidget(self.topRightGroupBox, 0, 5)
         self.mainLayout.addWidget(self.bottomTabWidget, 2, 0, 1, 4)
         self.mainLayout.addWidget(self.canvas1, 0, 4)
-        self.mainLayout.addWidget(self.canvas2, 2, 4)
+        self.mainLayout.addWidget(self.canvas2, 1, 4, 2, 1)
         self.mainLayout.addWidget(self.canvas3, 4, 4)
         self.mainLayout.addWidget(self.canvas4, 4, 0, 1, 2)
         self.mainLayout.addWidget(self.canvas5, 4, 2, 1, 2)
-        #self.mainLayout.addLayout(self.topLayout, 3, 0, 1, 4)
+        # self.mainLayout.addLayout(self.topLayout, 3, 0, 1, 4)
         self.setLayout(self.mainLayout)
 
         self.change_palette()
