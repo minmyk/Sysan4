@@ -2,28 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import QThread, Qt, QRect
 from Solver import *
-from sklearn.preprocessing import MinMaxScaler
 from Animations import *
-
-
-class PowersThread(QThread):
-    def __init__(self, window):
-        QThread.__init__(self)
-        self.window = window
-
-    def run(self):
-        data = self.window.collect_data()
-        numbers = [data[5], data[6], data[7]]
-        kind = self.window.RcomboBox.currentText()
-        is_multi = self.window.multi.isChecked()
-        xd, yd = load_data(data[0], data[1], data[2], data[4], [data[5], data[6], data[7]])
-        scale_x = MinMaxScaler()
-        scale_y = MinMaxScaler()
-        x = scale_x.fit_transform(xd)
-        y = scale_y.fit_transform(yd)
-        if is_multi:
-            x = np.log(x + 2)
-        self.window.poly.setEnabled(True)
 
 
 class UI(QDialog):
@@ -59,7 +38,6 @@ class UI(QDialog):
         self.results = QLabel()
         self.originalPalette = QApplication.palette()
         self.topLayout = QHBoxLayout()
-        self.powers_thread = PowersThread(self)
         self.setWindowIcon(QIcon('icon.jpg'))
         self.setWindowTitle("Solver")
         self.setWindowIconText('Solver')
@@ -73,10 +51,10 @@ class UI(QDialog):
         self.create_bottom_group_box()
         self.create_menu()
         #
-        self.canvas1 = MyMplCanvas(self, width=9, height=3, dpi=100)
-        self.canvas2 = MyMplCanvas(self, width=6, height=3, dpi=100)
-        self.canvas3 = MyMplCanvas(self, width=6, height=3, dpi=100)
-        self.canvas4 = MyMplCanvas(self, width=6, height=3, dpi=100)
+        self.canvas1 = MyMplCanvas(self, width=9, height=3, dpi=100, title='Y1')
+        self.canvas2 = MyMplCanvas(self, width=6, height=3, dpi=100, title='Y2')
+        self.canvas3 = MyMplCanvas(self, width=6, height=3, dpi=100, title='Y3')
+        self.canvas4 = MyMplCanvas(self, width=6, height=3, dpi=100, title='Margin of tolerable risk')
         self.canvas5 = MyMplCanvas(self, width=6, height=3, dpi=100)
         #
         self.mainLayout = QGridLayout()
@@ -86,14 +64,12 @@ class UI(QDialog):
         self.mainLayout.addWidget(self.topMidGroupBox, 0, 1)
         self.mainLayout.addWidget(self.topMid2GroupBox, 0, 3)
         self.mainLayout.addWidget(self.topRightGroupBox, 0, 2)
-        # self.mainLayout.addWidget(self.topRightGroupBox, 0, 5)
         self.mainLayout.addWidget(self.bottomTabWidget, 2, 0, 1, 4)
         self.mainLayout.addWidget(self.canvas1, 0, 4)
         self.mainLayout.addWidget(self.canvas2, 1, 4, 2, 1)
         self.mainLayout.addWidget(self.canvas3, 4, 4)
         self.mainLayout.addWidget(self.canvas4, 4, 0, 1, 2)
         self.mainLayout.addWidget(self.canvas5, 4, 2, 1, 2)
-        # self.mainLayout.addLayout(self.topLayout, 3, 0, 1, 4)
         self.setLayout(self.mainLayout)
 
         self.change_palette()
@@ -269,25 +245,6 @@ class UI(QDialog):
 
         self.topMid2GroupBox.setLayout(layout)
 
-    def add_tabs(self, i):
-        tab = QWidget()
-        tab.setObjectName("tab_" + str(i + 1))
-        image = QPixmap('data/fig' + str(i + 1) + '.png')
-        image_label = QLabel(tab)
-        image_label.setText("")
-        image_label.setObjectName("image_label_" + str(i + 1))
-        image_label.setAlignment(Qt.AlignCenter)
-        image_label.setPixmap(image.scaled(755, 373))
-        self.bottomTabWidget.addTab(tab, "Plot " + str(i + 1))
-        self.tabs.append(tab)
-
-    def remove_tabs(self):
-        n = len(self.tabs)
-        for i in range(1, n + 1):
-            to_del = self.tabs[n - i]
-            self.tabs.remove(to_del)
-            to_del.deleteLater()
-
     def create_bottom_group_box(self):
         self.tab1hbox = QHBoxLayout()
         self.Btab1 = QWidget()
@@ -327,46 +284,49 @@ class UI(QDialog):
         values = [el.value() if type(el) != QLineEdit else el.text() for el in self.inputs]
         return values
 
+    # '''
     def execute(self):
-        self.remove_tabs()
-        self.Btable.clear()
-        data = self.collect_data()
-        numbers = [data[5], data[6], data[7]]
-        kind = self.RcomboBox.currentText()
+        window_forecast = self.prognosis.value()
+        window_build = self.period.value()
+        speed = self.speed.value()
+        kind = self.RcomboBox.currentText() # not fixed yet
+        parameters = self.collect_data()
+        detectors = [parameters[8], parameters[9], parameters[10], parameters[11]] # not fixed yet
+        numbers = [parameters[3], parameters[4], parameters[5]]
+        orders = [parameters[0], parameters[1], parameters[2]]
+        # clearButton
+        file_y = parameters[1]
+        file_x = parameters[2]
         is_multi = self.multi.isChecked()
-        orders = data[-3:]
-        xd, yd = load_data(data[0], data[1], data[2], data[4], [data[5], data[6], data[7]])
-        scaler_x = MinMaxScaler()
-        scaler_y = MinMaxScaler()
-        y_scales = []
-        for col in yd.columns:
-            y_scales.append(MinMaxScaler())
-            y_scales[-1].fit(yd[col].to_numpy().reshape(-1, 1))
+        data, normalizer = normalize(load_data(parameters[7], parameters[7], file_x, file_y), is_multi)
+        x, y = data[0], data[1]
 
-        x = scaler_x.fit_transform(xd)
-        y = scaler_y.fit_transform(yd)
-        pol, min_poly = set_poly(kind, orders, numbers, x, is_multi)
-        if is_multi:
-            y = np.log(y + min_poly)
-        self.Btable.clear()
-        self.Btable.append("Polynoms: " + str(kind) + "\n")
-        for t in range(data[4]):
-            variables = set_vars(orders, numbers, x)
-            lamb = fit(pol, y[:, t])
-            psy = set_psy(lamb, numbers, orders, pol, is_multi, min_poly)
-            a = fit(psy, y[:, t])
-            fs = set_f(a, numbers, psy, is_multi, min_poly)
+        self.Btable.insertRow(0)
+        for i in range(7):
+            self.Btable.setItem(0, i, QTableWidgetItem('-'))
+        arr = [[[11.7, 1e10], [11.5, 1e10]], [[4.1, 1e10], [0.5, 1e10]], [[11.85, 1e10], [11.80, 1e10]]]
+        datchicks = indicator(y.T, window_forecast)
+        datchicks = list(map(lambda k: [datchicks[k]] * window_forecast, range(len(datchicks))))
+        datchicks = sum(datchicks)
+        for i in range(parameters[6]):
+            y1, y2 = form_data_animation(x, y[:, i], [orders, numbers], window_build, window_forecast)
+            y1, y2 = denormalize((y1, y2), normalizer[i])
 
-            visualize(y[:, t], pol, lamb, t, kind, y_scales[t], self.normalize.isChecked(), is_multi, min_poly,
-                      error(y[:, t], pol, lamb, is_multi))
+            y2 = y2 + np.random.normal(0, 0.01 * (max(y2) - min(y2)), len(y2))
 
-            self.add_tabs(t)
+            blablablabla(y1, y2, window_forecast, True, i, speed, arr[i], self.pause,
+                         self.resume, self.Btable, parameters[6], normalizer[i], False, [], datchicks)
 
-        f = open('data/' + data[3] + ".txt", "w+")
-        f.write('\nResult: \n')
-        f.write(self.Btable.toPlainText())
+        blablablabla(y1, y2, window_forecast, True, 3, speed, [[-1, 400]] * 4,
+                     self.pause, self.resume, self.Btable, parameters[6], normalizer[i], True,
+                     detectors, datchicks)
 
-    def calculate_powers(self):
-        self.poly.setEnabled(False)
-        self.results.setText('Computing...')
-        self.powers_thread.start()
+    '''
+
+    def execute(self):
+        pass
+    
+    '''
+    # temporary
+def blablablabla(*args):
+    pass

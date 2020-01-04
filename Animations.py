@@ -14,10 +14,11 @@ from Solver import *
 
 
 class MyMplCanvas(FigureCanvas):
-    """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
-    def __init__(self, parent=None, width=5, height=4, dpi=100):
+    def __init__(self, parent=None, width=5, height=4, dpi=100, title=None):
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
+        self.axes.set_title(title)
+
         self.compute_initial_figure()
 
         FigureCanvas.__init__(self, fig)
@@ -172,8 +173,8 @@ class AnimationWidget(QtWidgets.QWidget):
 
         def find_in_column(column_num, value):
             for rowIndex in range(self.table.rowCount()):
-                twItem = self.table.item(rowIndex, column_num)
-                if twItem.text() == value:
+                tw_item = self.table.item(rowIndex, column_num)
+                if tw_item.text() == value:
                     return rowIndex
             else:
                 return -1
@@ -218,9 +219,6 @@ class AnimationWidget(QtWidgets.QWidget):
                 alarms = [0] * len(self.levels)
                 for i in range(len(self.levels)):
                     alarms[i] = alarm(i + 1, variance, growth)
-                for al in alarms:
-                    if al != 0:
-                        ahahhahahahahahaahha = 0
 
                 # TABLE
                 row_num = find_in_column(0, str(self.index))

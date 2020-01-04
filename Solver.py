@@ -74,22 +74,42 @@ def laguerre(n, x):
         return 1 / n * ((2 * n - 1 - x) * laguerre(n - 1, x) - (n - 1) * laguerre(n - 2, x))
 
 
-def load_data(x_len, y_file, x_file, numbers_y, numbers_x):
-    cols_x = []
-    for j in range(len(numbers_x)):
-        cols_x += ['X' + str(j + 1) + str(i + 1) for i in range(numbers_x[j])]
-    cols_y = ['Y' + str(i + 1) for i in range(numbers_y)]
+def load_data(lenx, leny, file_x, file_y):
     x = []
     y = []
-    read_x = open('data/' + x_file + ".txt", 'r')
-    read_y = open('data/' + y_file + ".txt", 'r')
-    for i in range(min(x_len, x_len)):
-        x.append(list(map(lambda z: float(z.replace(',', '.')), (read_x.readline()).split())))
-        y.append(list(map(lambda z: float(z.replace(',', '.')), (read_y.readline()).split())))
-        x[i] = x[i][1:]
-    df_x = pd.DataFrame(x, columns=cols_x)
-    df_y = pd.DataFrame(y, columns=cols_y)
-    return df_x, df_y
+    read_x = open("data/" + file_x + ".txt", 'r')
+    read_y = open("data/" + file_y + ".txt", 'r')
+    for i in range(lenx):
+        x.append(list(map(lambda z: float(z), (read_x.readline()).split())))
+        y.append(list(map(lambda z: float(z), (read_y.readline()).split())))
+        x[i] = x[i][:len(x[i])]
+        y[i] = y[i][:len(y[i])]
+    return [np.array(x), np.array(y)]
+
+
+def normalize(data, is_multi):
+    normalizer = []
+    for arr in data:
+        normalizer = []
+        for i in range(arr.shape[1]):
+            arr[:, i] += np.random.normal(0, (max(arr[:, i]) - min(arr[:, i]))*0.001, len(arr[:, i]))
+            m = min(arr[:, i])
+            mbig = max(arr[:, i])
+            normalizer.append([m, mbig])
+            arr[:, i] -= m
+            arr[:, i] /= (mbig - m)
+    if is_multi:
+        data[1] += 2
+        data[1] = np.log(data[1])
+    return data, normalizer
+
+
+def denormalize(data, normalizer):
+    for arr in data:
+        for i in range(len(arr)):
+            arr[i] *= (normalizer[1] - normalizer[0])
+            arr[i] += normalizer[0]
+    return data
 
 
 def set_vars(orders, numbers, x):
