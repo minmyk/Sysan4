@@ -19,11 +19,10 @@ class MyMplCanvas(FigureCanvas):
         pass
 
 
-class AnimationWidgets(QtWidgets.QWidget):
+class AnimationWidgets():
 
     def __init__(self, y_init, y_real, window, autoplay, filenumber, anim_speed, danger_levels, stop_func, start_func,
                  result_table, num_of_y, normalizer, read_risks, datchicks, graph):
-        super().__init__()
         self.playing = autoplay
         self.canvas = graph
         self.datchicks = datchicks
@@ -103,8 +102,8 @@ class AnimationWidgets(QtWidgets.QWidget):
         self.line1, = self.canvas.axes.plot(self.x1, self.y_real, animated=True, lw=1, color='black')
         self.line, = self.canvas.axes.plot(self.x, self.y_fcast, animated=True, lw=1, color='orange')
         self.line2, = self.canvas.axes.plot(self.x1, self.min_val, animated=True, lw=1, color='blue')
-        self.line3, = self.canvas.axes.plot(self.x, self.max_val, animated=True, lw=1, color='green')
-        if read_risks:
+        self.line3, = self.canvas.axes.plot(self.x1, self.max_val, animated=True, lw=1, color='green')
+        if not read_risks:
             time.sleep(1.5)
         self.ani = animation.FuncAnimation(self.canvas.figure, self.update_line, blit=True, interval=anim_speed)
 

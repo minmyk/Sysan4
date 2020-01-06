@@ -221,9 +221,6 @@ class UI(QDialog):
         self.period = QSpinBox()
         self.pro_label = QLabel("Prognosis window")
         self.prognosis = QSpinBox()
-        self.adeq_label = QLabel("Adequacy of measurements")
-        self.adeq = QComboBox()
-        self.adeq.addItems(["1", "2", "3", "4"])
         # self.inputs.append(self.MspinBox4)
 
         self.speed.setRange(1, 100)
@@ -235,11 +232,9 @@ class UI(QDialog):
         layout.addWidget(self.speed, 0, 1)
         layout.addWidget(self.period, 2, 1)
         layout.addWidget(self.prognosis, 3, 1)
-        layout.addWidget(self.adeq, 4, 1)
         layout.addWidget(self.speed_label, 0, 0)
         layout.addWidget(self.per_label, 2, 0)
         layout.addWidget(self.pro_label, 3, 0)
-        layout.addWidget(self.adeq_label, 4, 0)
         # self.topMidGroupBox.setFixedHeight(190)
         self.topRightGroupBox.setFixedWidth(260)
 
@@ -307,7 +302,6 @@ class UI(QDialog):
 
             animation = AnimationWidgets(y1, y2, window_forecast, True, i, speed, arr[i], self.pause, self.resume,
                                          self.Btable, parameters[4], normalizer[i], False, datchicks, self.graphs[i])
-            animation.show()
             print(i)
         #animation = AnimationWidgets(y1, y2, window_forecast, True, 3, speed, [[-1, 400]] * 4, self.pause, self.resume,
         #                             self.Btable, parameters[6], normalizer[i], True, datchicks, self.graphs[-1])
