@@ -3,6 +3,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import QThread, Qt, QRect
 from Solver import *
 from Animations import *
+from functools import reduce
 
 
 class UI(QDialog):
@@ -56,14 +57,15 @@ class UI(QDialog):
         self.canvas3 = MyMplCanvas(self, width=6, height=3, dpi=100, title='Y3')
         self.canvas4 = MyMplCanvas(self, width=6, height=3, dpi=100, title='Margin of tolerable risk')
         self.canvas5 = MyMplCanvas(self, width=6, height=3, dpi=100)
+        self.graphs = [self.canvas1, self.canvas2, self.canvas3, self.canvas4, self.canvas5]
         #
         self.mainLayout = QGridLayout()
 
         self.mainLayout.addLayout(self.topLayout, 1, 0, 1, 4)
         self.mainLayout.addWidget(self.topLeftGroupBox, 0, 0)
         self.mainLayout.addWidget(self.topMidGroupBox, 0, 1)
-        self.mainLayout.addWidget(self.topMid2GroupBox, 0, 3)
         self.mainLayout.addWidget(self.topRightGroupBox, 0, 2)
+        self.mainLayout.addWidget(self.topMid2GroupBox, 0, 3)
         self.mainLayout.addWidget(self.bottomTabWidget, 2, 0, 1, 4)
         self.mainLayout.addWidget(self.canvas1, 0, 4)
         self.mainLayout.addWidget(self.canvas2, 1, 4, 2, 1)
@@ -182,7 +184,7 @@ class UI(QDialog):
         layout.addWidget(self.Rlabel5, 3, 0)
         layout.addWidget(self.Rlabel6, 4, 0)
 
-        #self.topRightGroupBox.setFixedHeight(190)
+        # self.topRightGroupBox.setFixedHeight(190)
         self.topRightGroupBox.setFixedWidth(200)
 
         self.topRightGroupBox.setLayout(layout)
@@ -208,7 +210,7 @@ class UI(QDialog):
         layout.addWidget(self.Mlabel3, 2, 0)
         layout.addWidget(self.Mlabel4, 3, 0)
 
-        #self.topMidGroupBox.setFixedHeight(190)
+        # self.topMidGroupBox.setFixedHeight(190)
         self.topMidGroupBox.setFixedWidth(200)
 
         self.topMidGroupBox.setLayout(layout)
@@ -275,10 +277,6 @@ class UI(QDialog):
         self.poly.setEnabled(True)
         self.Btable.clear()
         self.results.clear()
-        self.remove_tabs()
-        if self.powers_thread.isRunning():
-            self.powers_thread.terminate()
-            self.powers_thread.wait(10)
 
     def collect_data(self):
         values = [el.value() if type(el) != QLineEdit else el.text() for el in self.inputs]
@@ -289,44 +287,42 @@ class UI(QDialog):
         window_forecast = self.prognosis.value()
         window_build = self.period.value()
         speed = self.speed.value()
-        kind = self.RcomboBox.currentText() # not fixed yet
+        kind = self.RcomboBox.currentText()  # not fixed yet
         parameters = self.collect_data()
-        detectors = [parameters[8], parameters[9], parameters[10], parameters[11]] # not fixed yet
-        numbers = [parameters[3], parameters[4], parameters[5]]
-        orders = [parameters[0], parameters[1], parameters[2]]
+        numbers = parameters[5:-3]
+        orders = parameters[-3:]
         # clearButton
         file_y = parameters[1]
         file_x = parameters[2]
         is_multi = self.multi.isChecked()
-        data, normalizer = normalize(load_data(parameters[7], parameters[7], file_x, file_y), is_multi)
-        x, y = data[0], data[1]
-
+        data, normalizer = normalize(load_data(parameters[0], parameters[0], file_x, file_y), is_multi)
+        x, y = data
+        print('forecast ' + str(window_forecast))
+        print('build ' + str(window_build))
+        print('speed ' + str(speed))
+        print('kind ' + str(kind))
+        print('numbers ' + str(numbers))
+        print('orders ' + str(orders))
+        print('y ' + str(file_y))
+        print('x ' + str(file_x))
+        print('multi ' + str(is_multi))
+        print('parameters' + str(parameters))
         self.Btable.insertRow(0)
         for i in range(7):
             self.Btable.setItem(0, i, QTableWidgetItem('-'))
         arr = [[[11.7, 1e10], [11.5, 1e10]], [[4.1, 1e10], [0.5, 1e10]], [[11.85, 1e10], [11.80, 1e10]]]
         datchicks = indicator(y.T, window_forecast)
         datchicks = list(map(lambda k: [datchicks[k]] * window_forecast, range(len(datchicks))))
-        datchicks = sum(datchicks)
+        datchicks = list(reduce(lambda a, b: a + b, datchicks))
         for i in range(parameters[6]):
-            y1, y2 = form_data_animation(x, y[:, i], [orders, numbers], window_build, window_forecast)
+            y1, y2 = form_data_animation(x, y[:, i], [orders, numbers], window_build, window_forecast, kind)
             y1, y2 = denormalize((y1, y2), normalizer[i])
 
             y2 = y2 + np.random.normal(0, 0.01 * (max(y2) - min(y2)), len(y2))
+            animation = AnimationWidget(y1, y2, window_forecast, True, i, speed, arr[i], self.pause, self.resume,
+                                        self.Btable, parameters[6], normalizer[i], False, datchicks, self.graphs)
+            animation.show()
 
-            blablablabla(y1, y2, window_forecast, True, i, speed, arr[i], self.pause,
-                         self.resume, self.Btable, parameters[6], normalizer[i], False, [], datchicks)
-
-        blablablabla(y1, y2, window_forecast, True, 3, speed, [[-1, 400]] * 4,
-                     self.pause, self.resume, self.Btable, parameters[6], normalizer[i], True,
-                     detectors, datchicks)
-
-    '''
-
-    def execute(self):
-        pass
-    
-    '''
-    # temporary
-def blablablabla(*args):
-    pass
+        animation = AnimationWidget(y1, y2, window_forecast, True, 3, speed, [[-1, 400]] * 4, self.pause, self.resume,
+                                    self.Btable, parameters[6], normalizer[i], True, datchicks, self.graphs)
+        animation.show()

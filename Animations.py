@@ -33,7 +33,7 @@ class MyMplCanvas(FigureCanvas):
 class AnimationWidget(QtWidgets.QWidget):
 
     def __init__(self, y_init, y_real, window, autoplay, filenumber, anim_speed, danger_levels, stop_func, start_func,
-                 result_table, num_of_y, normalizer, read_risks, detectors, datchicks):
+                 result_table, num_of_y, normalizer, read_risks, datchicks, graphs):
         # self.func_anim = func
         QMainWindow.__init__(self)
         self.playing = autoplay
@@ -51,7 +51,6 @@ class AnimationWidget(QtWidgets.QWidget):
         self.setLayout(vbox)
 
         self.datchicks = datchicks
-        self.detectors = detectors
         self.normalizer = normalizer
         self.num_of_y = num_of_y
         self.read_risks = read_risks
@@ -71,11 +70,11 @@ class AnimationWidget(QtWidgets.QWidget):
 
         risks = abs(self.y_real[1:] - self.y_real[:-1])
         differences = np.vstack((abs(self.y_real - self.min_val), abs(self.y_real - self.max_val)))
-        differences = np.array(
-            list(map(lambda j: min(differences[0][j], differences[1][j]), range(differences.shape[1]))))
-        risk_maxs = np.array(list(
-            map(lambda j: max(risks[max(0, j - window):max(len(self.y_real), j + int(window / 2))]),
-                range(len(risks)))))
+        differences = np.array(list(map(lambda a: min(differences[0][a], differences[1][a]),
+                                        range(differences.shape[1]))))
+        risk_maxs = np.array(list(map(lambda a: max(risks[
+                                                    max(0, a - window):max(len(self.y_real), a + int(window / 2))
+                                                    ]), range(len(risks)))))
         self.risk_management = (differences[1:] / risk_maxs) * self.window
         self.risk_exist = np.zeros(len(self.risk_management))
         print(self.datchicks)
@@ -140,22 +139,22 @@ class AnimationWidget(QtWidgets.QWidget):
 
     def update_line(self, i):
 
-        def alarm(level, variance, growth):
+        def alarm(level, variance_, growth_):
             if ((self.correl[min(len(self.y_fcast) - 1, self.index)] > 0.5 and
                  self.levels[level - 1][1] - self.y_real[min(len(self.y_fcast) - 1, self.index)] < np.sqrt(
-                        variance) and growth > 0)
+                        variance_) and growth_ > 0)
                     or
                     (self.correl[min(len(self.y_fcast) - 1, self.index)] > 0.5 and
                      -self.levels[level - 1][0] + self.y_real[min(len(self.y_fcast) - 1, self.index)] < np.sqrt(
-                                variance) and growth < 0)
+                                variance_) and growth_ < 0)
                     or
                     (self.correl[min(len(self.y_fcast) - 1, self.index)] < -0.5 and
                      self.levels[level - 1][1] - self.y_real[min(len(self.y_fcast) - 1, self.index)] < np.sqrt(
-                                variance) and growth < 0)
+                                variance_) and growth_ < 0)
                     or
                     (self.correl[min(len(self.y_fcast) - 1, self.index)] < -0.5 and
                      -self.levels[level - 1][0] + self.y_real[min(len(self.y_fcast) - 1, self.index)] < np.sqrt(
-                                variance) and growth > 0)):
+                                variance_) and growth_ > 0)):
 
                 return level
             else:
@@ -170,14 +169,6 @@ class AnimationWidget(QtWidgets.QWidget):
             self.playing = False
             self.start_button.click()
             self.ani.event_source.start()
-
-        def find_in_column(column_num, value):
-            for rowIndex in range(self.table.rowCount()):
-                tw_item = self.table.item(rowIndex, column_num)
-                if tw_item.text() == value:
-                    return rowIndex
-            else:
-                return -1
 
         try:
 
@@ -221,61 +212,7 @@ class AnimationWidget(QtWidgets.QWidget):
                     alarms[i] = alarm(i + 1, variance, growth)
 
                 # TABLE
-                row_num = find_in_column(0, str(self.index))
-                if row_num >= 0:
-
-                    if not self.read_risks:
-                        self.table.setItem(row_num, self.filenumber + 1, QTableWidgetItem(str(self.y_real[self.index])))
-
-                else:
-                    self.table.insertRow(0)
-                    self.table.setItem(0, 0, QTableWidgetItem(str(self.index)))
-                    if not self.read_risks:
-                        self.table.setItem(0, self.filenumber + 1, QTableWidgetItem(str(self.y_real[self.index])))
-                    else:
-                        self.table.setItem(0, 4, QTableWidgetItem("Безопасная ситуация."))
-                    for i in range(1, 7):
-                        if i != self.filenumber + 1:
-                            self.table.setItem(0, i, QTableWidgetItem("-"))
-                    row_num = 0
-
-                if self.risk_exist[self.index] != 0:
-                    if self.table.item(row_num, 5).text() == '1' and self.table.item(row_num, 4).text()[-1] != 'я':
-                        self.table.setItem(row_num, 5, QTableWidgetItem('2'))
-                        self.table.setItem(row_num, 4, QTableWidgetItem('НС по 2 параметрам'))
-                        self.table.setItem(row_num, 6, QTableWidgetItem(
-                            self.table.item(row_num, 6).text() + '-й, ' + str(self.filenumber + 1)))
-
-                    elif self.table.item(row_num, 5).text() == '2' and self.table.item(row_num, 4).text()[-1] != 'я':
-                        self.table.setItem(row_num, 5, QTableWidgetItem('3'))
-                        self.table.setItem(row_num, 4, QTableWidgetItem('НС по 3 параметрам'))
-                        self.table.setItem(row_num, 6, QTableWidgetItem(
-                            self.table.item(row_num, 6).text() + '-й, ' + str(self.filenumber + 1)))
-                    elif self.table.item(row_num, 4).text()[-1] != 'я':
-                        self.table.setItem(row_num, 5, QTableWidgetItem('1'))
-                        self.table.setItem(row_num, 4, QTableWidgetItem('НС по 1 параметру'))
-                        self.table.setItem(row_num, 6, QTableWidgetItem(str(self.filenumber + 1)))
-
-                else:
-                    if self.table.item(row_num, 5).text() not in ['1', '2', '3'] and \
-                            self.table.item(row_num, 4).text()[-1] != 'я':
-                        self.table.setItem(row_num, 5, QTableWidgetItem('0'))
-                        self.table.setItem(row_num, 4, QTableWidgetItem('Безопасная ситуация.'))
-
-                if self.y_fcast[self.index] < self.levels[1][0]:
-                    self.table.setItem(row_num, 4, QTableWidgetItem('Авария'))
-                    self.table.setItem(row_num, 5, QTableWidgetItem('Максимальный'))
-
-                    self.table.setItem(row_num, 6, QTableWidgetItem(str(self.filenumber + 1) + '-й параметр'))
-
-                not_yet = 0
-                for i in range(self.num_of_y):
-                    if self.table.item(row_num, i + 1).text() == '-':
-                        not_yet = 1
-                if not_yet == 0 and self.table.item(row_num, 5).text() not in ['0', '-'] and \
-                        self.table.item(row_num, 6).text()[-1] != 'р':
-                    self.table.setItem(row_num, 6, QTableWidgetItem(self.table.item(row_num, 6).text() + '-й параметр'))
-                # TABLE
+                self.table_search()
 
             if not self.playing and self.begin < 1:
                 self.line.set_xdata(np.arange(len(self.data)))
@@ -298,19 +235,8 @@ class AnimationWidget(QtWidgets.QWidget):
                 print("equals to " + str(self.datchicks[self.index]))
                 if self.datchicks[self.index] == 1:
                     print("alarma - ha- hi- he- ho   " + str(self.index))
-                    if self.index % 2 == 0:
-                        self.detectors[0].setDown(True)
-                        self.detectors[1].setDown(False)
-                        self.detectors[2].setDown(True)
-                        self.detectors[3].setDown(False)
-                    else:
-                        self.detectors[0].setDown(False)
-                        self.detectors[1].setDown(True)
-                        self.detectors[2].setDown(False)
-                        self.detectors[3].setDown(True)
                 else:
-                    for dat in self.detectors:
-                        dat.setDown(False)
+                    print("no alarma" + str(self.index))
                 self.criteria.set_ydata(self.risk_management[:self.index])
                 self.criteria.set_xdata(self.x1[:self.index])
 
@@ -347,6 +273,70 @@ class AnimationWidget(QtWidgets.QWidget):
             else:
                 return [self.line1, self.line, self.line3, self.line2]
 
+    def find_in_column(self, column_num, value):
+        for rowIndex in range(self.table.rowCount()):
+            tw_item = self.table.item(rowIndex, column_num)
+            if tw_item.text() == value:
+                return rowIndex
+        else:
+            return -1
+
+    def table_search(self):
+        row_num = self.find_in_column(0, str(self.index))
+        if row_num >= 0:
+
+            if not self.read_risks:
+                self.table.setItem(row_num, self.filenumber + 1, QTableWidgetItem(str(self.y_real[self.index])))
+
+        else:
+            self.table.insertRow(0)
+            self.table.setItem(0, 0, QTableWidgetItem(str(self.index)))
+            if not self.read_risks:
+                self.table.setItem(0, self.filenumber + 1, QTableWidgetItem(str(self.y_real[self.index])))
+            else:
+                self.table.setItem(0, 4, QTableWidgetItem("Безопасная ситуация."))
+            for i in range(1, 7):
+                if i != self.filenumber + 1:
+                    self.table.setItem(0, i, QTableWidgetItem("-"))
+            row_num = 0
+
+        if self.risk_exist[self.index] != 0:
+            if self.table.item(row_num, 5).text() == '1' and self.table.item(row_num, 4).text()[-1] != 'я':
+                self.table.setItem(row_num, 5, QTableWidgetItem('2'))
+                self.table.setItem(row_num, 4, QTableWidgetItem('НС по 2 параметрам'))
+                self.table.setItem(row_num, 6, QTableWidgetItem(
+                    self.table.item(row_num, 6).text() + '-й, ' + str(self.filenumber + 1)))
+
+            elif self.table.item(row_num, 5).text() == '2' and self.table.item(row_num, 4).text()[-1] != 'я':
+                self.table.setItem(row_num, 5, QTableWidgetItem('3'))
+                self.table.setItem(row_num, 4, QTableWidgetItem('НС по 3 параметрам'))
+                self.table.setItem(row_num, 6, QTableWidgetItem(
+                    self.table.item(row_num, 6).text() + '-й, ' + str(self.filenumber + 1)))
+            elif self.table.item(row_num, 4).text()[-1] != 'я':
+                self.table.setItem(row_num, 5, QTableWidgetItem('1'))
+                self.table.setItem(row_num, 4, QTableWidgetItem('НС по 1 параметру'))
+                self.table.setItem(row_num, 6, QTableWidgetItem(str(self.filenumber + 1)))
+
+        else:
+            if self.table.item(row_num, 5).text() not in ['1', '2', '3'] and \
+                    self.table.item(row_num, 4).text()[-1] != 'я':
+                self.table.setItem(row_num, 5, QTableWidgetItem('0'))
+                self.table.setItem(row_num, 4, QTableWidgetItem('Безопасная ситуация.'))
+
+        if self.y_fcast[self.index] < self.levels[1][0]:
+            self.table.setItem(row_num, 4, QTableWidgetItem('Авария'))
+            self.table.setItem(row_num, 5, QTableWidgetItem('Максимальный'))
+
+            self.table.setItem(row_num, 6, QTableWidgetItem(str(self.filenumber + 1) + '-й параметр'))
+
+        not_yet = 0
+        for i in range(self.num_of_y):
+            if self.table.item(row_num, i + 1).text() == '-':
+                not_yet = 1
+        if not_yet == 0 and self.table.item(row_num, 5).text() not in ['0', '-'] and \
+                self.table.item(row_num, 6).text()[-1] != 'р':
+            self.table.setItem(row_num, 6, QTableWidgetItem(self.table.item(row_num, 6).text() + '-й параметр'))
+
     def on_start(self):
         if self.playing:
             pass
@@ -374,3 +364,5 @@ class AnimationWidget(QtWidgets.QWidget):
     def closeEvent(self, event):
 
         event.accept()
+
+
