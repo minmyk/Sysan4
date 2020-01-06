@@ -287,7 +287,7 @@ class UI(QDialog):
         window_forecast = self.prognosis.value()
         window_build = self.period.value()
         speed = self.speed.value()
-        kind = self.RcomboBox.currentText()  # not fixed yet
+        kind = self.RcomboBox.currentText()
         parameters = self.collect_data()
         numbers = parameters[5:-3]
         orders = parameters[-3:]
@@ -297,6 +297,8 @@ class UI(QDialog):
         is_multi = self.multi.isChecked()
         data, normalizer = normalize(load_data(parameters[0], parameters[0], file_x, file_y), is_multi)
         x, y = data
+        print('x ' + str(x))
+        print('y ' + str(y))
         print('forecast ' + str(window_forecast))
         print('build ' + str(window_build))
         print('speed ' + str(speed))
@@ -314,15 +316,16 @@ class UI(QDialog):
         datchicks = indicator(y.T, window_forecast)
         datchicks = list(map(lambda k: [datchicks[k]] * window_forecast, range(len(datchicks))))
         datchicks = list(reduce(lambda a, b: a + b, datchicks))
-        for i in range(parameters[6]):
+        print(datchicks)
+        for i in range(parameters[4]):
             y1, y2 = form_data_animation(x, y[:, i], [orders, numbers], window_build, window_forecast, kind)
             y1, y2 = denormalize((y1, y2), normalizer[i])
 
             y2 = y2 + np.random.normal(0, 0.01 * (max(y2) - min(y2)), len(y2))
-            animation = AnimationWidget(y1, y2, window_forecast, True, i, speed, arr[i], self.pause, self.resume,
-                                        self.Btable, parameters[6], normalizer[i], False, datchicks, self.graphs)
+            animation = AnimationWidgets(y1, y2, window_forecast, True, i, speed, arr[i], self.pause, self.resume,
+                                         self.Btable, parameters[6], normalizer[i], False, datchicks, self.graphs)
             animation.show()
 
-        animation = AnimationWidget(y1, y2, window_forecast, True, 3, speed, [[-1, 400]] * 4, self.pause, self.resume,
-                                    self.Btable, parameters[6], normalizer[i], True, datchicks, self.graphs)
+        animation = AnimationWidgets(y1, y2, window_forecast, True, 3, speed, [[-1, 400]] * 4, self.pause, self.resume,
+                                     self.Btable, parameters[6], normalizer[i], True, datchicks, self.graphs)
         animation.show()

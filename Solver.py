@@ -112,24 +112,6 @@ def denormalize(data, normalizer):
     return data
 
 
-def set_vars(orders, numbers, x):
-    variables = []
-    for k in range(x.shape[0]):
-        variables.append([])
-        for j in range(0, numbers[0]):
-            if j == 0:
-                variables[k].append(1)
-            for i in range((orders[0])):
-                variables[k].append(x[k][j] ** (i + 1))
-        for j in range(numbers[0], numbers[1] + numbers[0]):
-            for i in range((orders[1])):
-                variables[k].append(x[k][j] ** (i + 1))
-        for j in range(numbers[1] + numbers[0], numbers[1] + numbers[0] + numbers[2]):
-            for i in range((orders[2])):
-                variables[k].append(x[k][j] ** (i + 1))
-    return np.array(variables)
-
-
 def set_poly(mode, orders, numbers, x, is_multi):
     applier = None
     if mode == 'Chebyshev':
@@ -175,80 +157,6 @@ def set_poly(mode, orders, numbers, x, is_multi):
     return np.array(polynomial), min_poly
 
 
-def set_psy(coefc, numbers, orders, x, is_multi, min_poly=None):
-    polynomial = []
-
-    if is_multi:
-        for k in range(x.shape[0]):
-            polynomial.append([1])
-            index = 0
-            for j in range(0, numbers[0]):
-                if j == 0:
-                    index += 1
-                else:
-                    index += orders[0]
-                polynomial[k].append(np.log(min_poly + predict(coefc[index: index + orders[0]],
-                                                               x[k, index: index + orders[0]], is_multi, min_poly)))
-            for j in range(0, numbers[1]):
-                if j == 0:
-                    index += orders[0]
-                else:
-                    index += orders[1]
-                polynomial[k].append(np.log(min_poly + predict(coefc[index: index + orders[1]],
-                                                               x[k, index: index + orders[1]], is_multi, min_poly)))
-            for j in range(0, numbers[2]):
-                if j == 0:
-                    index += orders[1]
-                else:
-                    index += orders[2]
-                polynomial[k].append(np.log(min_poly + predict(coefc[index: index + orders[2]],
-                                                               x[k, index: index + orders[2]], is_multi, min_poly)))
-    else:
-        for k in range(x.shape[0]):
-            polynomial.append([1])
-            index = 0
-            for j in range(0, numbers[0]):
-                if j == 0:
-                    index += 1
-                else:
-                    index += orders[0]
-                polynomial[k].append(predict(coefc[index: index + orders[0]], x[k, index: index + orders[0]], is_multi))
-            for j in range(0, numbers[1]):
-                if j == 0:
-                    index += orders[0]
-                else:
-                    index += orders[1]
-                polynomial[k].append(predict(coefc[index: index + orders[1]], x[k, index: index + orders[1]], is_multi))
-            for j in range(0, numbers[2]):
-                if j == 0:
-                    index += orders[1]
-                else:
-                    index += orders[2]
-                polynomial[k].append(predict(coefc[index: index + orders[2]], x[k, index: index + orders[2]], is_multi))
-    return np.array(polynomial)
-
-
-def set_f(coefc, numbers, x, is_multi, min_poly=None):
-    polynomial = []
-    if is_multi:
-        for k in range(x.shape[0]):
-            polynomial.append([1])
-            index = 1
-            for j in range(0, len(numbers)):
-                polynomial[k].append(np.log(min_poly + predict(coefc[index: index + numbers[j]],
-                                                               x[k, index: index + numbers[j]], is_multi, min_poly)))
-                index += numbers[j]
-    else:
-        for k in range(x.shape[0]):
-            polynomial.append([1])
-            index = 1
-            for j in range(0, len(numbers)):
-                polynomial[k].append(
-                    predict(coefc[index: index + numbers[j]], x[k, index: index + numbers[j]], is_multi))
-                index += numbers[j]
-    return np.array(polynomial)
-
-
 def fit(polynomial, y):
     return np.linalg.lstsq(polynomial, y, rcond=1)[0]
 
@@ -256,36 +164,6 @@ def fit(polynomial, y):
 def predict(coefc, x, is_multi, min_poly=0):
     return np.exp(x @ np.array(coefc).T - min_poly) if is_multi else x @ np.array(coefc).T
 
-
-def error(y, x, coefc, is_multi):
-    difference = np.exp(y) - np.exp(x @ np.array(coefc).T) if is_multi \
-        else x @ np.array(coefc).T - y
-    return np.linalg.norm(difference)
-
-
-def visualize(y, x, coefc, t, kind, scaler, normal, is_multi, min_poly, err):
-    if is_multi and not normal:
-        normal = True
-    rc('axes', linewidth=0.6)
-    plt.xticks(fontsize=10)
-    plt.yticks(fontsize=10)
-    plt.figure(figsize=(7.55, 3.73))
-    if not normal:
-        x1 = scaler.inverse_transform((x @ np.array(coefc).T).reshape((-1, 1))).flatten()
-        y1 = scaler.inverse_transform(np.array(y).reshape((-1, 1))).flatten()
-    else:
-        x1 = x @ np.array(coefc).T
-        y1 = np.array(y)
-    n = np.arange(0, len(y), 1)
-    if is_multi:
-        plt.plot(n, np.exp(x1) - min_poly)
-        plt.plot(n, np.exp(y1) - min_poly)
-    else:
-        plt.plot(n, x1)
-        plt.plot(n, y1)
-    plt.gca().legend(('Y' + str(t + 1), 'Approximation'))
-    plt.title(str(kind) + ' error: ' + str(err))
-    plt.savefig('data/fig' + str(t + 1) + '.png', orientation='landscape')
 
 # new lab 4
 

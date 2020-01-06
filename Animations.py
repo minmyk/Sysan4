@@ -11,6 +11,7 @@ import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from Solver import *
+from Window import *
 
 
 class MyMplCanvas(FigureCanvas):
@@ -30,7 +31,7 @@ class MyMplCanvas(FigureCanvas):
 # new
 
 
-class AnimationWidget(QtWidgets.QWidget):
+class AnimationWidgets(QtWidgets.QWidget):
 
     def __init__(self, y_init, y_real, window, autoplay, filenumber, anim_speed, danger_levels, stop_func, start_func,
                  result_table, num_of_y, normalizer, read_risks, datchicks, graphs):
@@ -364,5 +365,3 @@ class AnimationWidget(QtWidgets.QWidget):
     def closeEvent(self, event):
 
         event.accept()
-
-
