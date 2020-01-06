@@ -1,17 +1,9 @@
-import copy
 from matplotlib import animation as animation
-from IPython.display import display, clear_output
-import sys, os, random
-from PyQt5 import QtCore
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5 import QtCore, QtGui, QtWidgets
-import numpy as np
+from PyQt5 import QtWidgets
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+from PyQt5.QtWidgets import *
 from Solver import *
-from Window import *
 
 
 class MyMplCanvas(FigureCanvas):
@@ -19,37 +11,21 @@ class MyMplCanvas(FigureCanvas):
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
         self.axes.set_title(title)
-
         self.compute_initial_figure()
-
         FigureCanvas.__init__(self, fig)
         self.setParent(parent)
 
     def compute_initial_figure(self):
         pass
 
-# new
-
 
 class AnimationWidgets(QtWidgets.QWidget):
 
     def __init__(self, y_init, y_real, window, autoplay, filenumber, anim_speed, danger_levels, stop_func, start_func,
                  result_table, num_of_y, normalizer, read_risks, datchicks, graphs):
-        # self.func_anim = func
-        QMainWindow.__init__(self)
+
         self.playing = autoplay
-        vbox = QVBoxLayout()
         self.canvas = MyMplCanvas(self, width=5, height=4, dpi=100)
-        vbox.addWidget(self.canvas)
-        hbox = QHBoxLayout()
-        self.start_button = QPushButton("start", self)
-        self.stop_button = QPushButton("stop", self)
-        self.start_button.clicked.connect(self.on_start)
-        self.stop_button.clicked.connect(self.on_stop)
-        hbox.addWidget(self.start_button)
-        hbox.addWidget(self.stop_button)
-        vbox.addLayout(hbox)
-        self.setLayout(vbox)
 
         self.datchicks = datchicks
         self.normalizer = normalizer
@@ -139,42 +115,9 @@ class AnimationWidgets(QtWidgets.QWidget):
         )
 
     def update_line(self, i):
-
-        def alarm(level, variance_, growth_):
-            if ((self.correl[min(len(self.y_fcast) - 1, self.index)] > 0.5 and
-                 self.levels[level - 1][1] - self.y_real[min(len(self.y_fcast) - 1, self.index)] < np.sqrt(
-                        variance_) and growth_ > 0)
-                    or
-                    (self.correl[min(len(self.y_fcast) - 1, self.index)] > 0.5 and
-                     -self.levels[level - 1][0] + self.y_real[min(len(self.y_fcast) - 1, self.index)] < np.sqrt(
-                                variance_) and growth_ < 0)
-                    or
-                    (self.correl[min(len(self.y_fcast) - 1, self.index)] < -0.5 and
-                     self.levels[level - 1][1] - self.y_real[min(len(self.y_fcast) - 1, self.index)] < np.sqrt(
-                                variance_) and growth_ < 0)
-                    or
-                    (self.correl[min(len(self.y_fcast) - 1, self.index)] < -0.5 and
-                     -self.levels[level - 1][0] + self.y_real[min(len(self.y_fcast) - 1, self.index)] < np.sqrt(
-                                variance_) and growth_ > 0)):
-
-                return level
-            else:
-                return 0
-
-        def stop_anim():
-            self.playing = True
-            self.stop_button.click()
-            self.ani.event_source.stop()
-
-        def start_anim():
-            self.playing = False
-            self.start_button.click()
-            self.ani.event_source.start()
-
         try:
-
             if self.playing and self.index < len(self.y_real):
-                self.stop_func.clicked.connect(stop_anim)
+                self.stop_func.clicked.connect(self.stop_anim)
 
                 if self.index % self.window > self.window / 4:
                     correl = crazylation(self.y_fcast[
@@ -210,7 +153,7 @@ class AnimationWidgets(QtWidgets.QWidget):
 
                 alarms = [0] * len(self.levels)
                 for i in range(len(self.levels)):
-                    alarms[i] = alarm(i + 1, variance, growth)
+                    alarms[i] = self.alarm(i + 1, variance, growth)
 
                 # TABLE
                 self.table_search()
@@ -230,7 +173,7 @@ class AnimationWidgets(QtWidgets.QWidget):
             if self.index >= len(self.y_real) - 2:
                 self.ani.event_source.interval = 1000
 
-            self.start_func.clicked.connect(start_anim)
+            self.start_func.clicked.connect(self.start_anim)
 
             if self.read_risks:
                 print("equals to " + str(self.datchicks[self.index]))
@@ -273,6 +216,16 @@ class AnimationWidgets(QtWidgets.QWidget):
 
             else:
                 return [self.line1, self.line, self.line3, self.line2]
+
+    def stop_anim(self):
+        self.playing = True
+        self.stop_button.click()
+        self.ani.event_source.stop()
+
+    def start_anim(self):
+        self.playing = False
+        self.start_button.click()
+        self.ani.event_source.start()
 
     def find_in_column(self, column_num, value):
         for rowIndex in range(self.table.rowCount()):
@@ -337,6 +290,27 @@ class AnimationWidgets(QtWidgets.QWidget):
         if not_yet == 0 and self.table.item(row_num, 5).text() not in ['0', '-'] and \
                 self.table.item(row_num, 6).text()[-1] != 'р':
             self.table.setItem(row_num, 6, QTableWidgetItem(self.table.item(row_num, 6).text() + '-й параметр'))
+
+    def alarm(self, level, variance_, growth_):
+        if ((self.correl[min(len(self.y_fcast) - 1, self.index)] > 0.5 and
+             self.levels[level - 1][1] - self.y_real[min(len(self.y_fcast) - 1, self.index)] < np.sqrt(
+                    variance_) and growth_ > 0)
+                or
+                (self.correl[min(len(self.y_fcast) - 1, self.index)] > 0.5 and
+                 -self.levels[level - 1][0] + self.y_real[min(len(self.y_fcast) - 1, self.index)] < np.sqrt(
+                            variance_) and growth_ < 0)
+                or
+                (self.correl[min(len(self.y_fcast) - 1, self.index)] < -0.5 and
+                 self.levels[level - 1][1] - self.y_real[min(len(self.y_fcast) - 1, self.index)] < np.sqrt(
+                            variance_) and growth_ < 0)
+                or
+                (self.correl[min(len(self.y_fcast) - 1, self.index)] < -0.5 and
+                 -self.levels[level - 1][0] + self.y_real[min(len(self.y_fcast) - 1, self.index)] < np.sqrt(
+                            variance_) and growth_ > 0)):
+
+            return level
+        else:
+            return 0
 
     def on_start(self):
         if self.playing:

@@ -1,23 +1,6 @@
 import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from matplotlib import rc
-import warnings
 from itertools import combinations
-
-
 import copy
-from matplotlib import animation
-from IPython.display import display, clear_output
-import sys, os, random
-from PyQt5 import QtCore
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5 import QtCore, QtGui, QtWidgets
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
-import matplotlib.animation as animation
 
 
 def memory_saver(f):
@@ -74,7 +57,7 @@ def laguerre(n, x):
         return 1 / n * ((2 * n - 1 - x) * laguerre(n - 1, x) - (n - 1) * laguerre(n - 2, x))
 
 
-def load_data(lenx, leny, file_x, file_y):
+def load_data(lenx, file_x, file_y):
     x = []
     y = []
     read_x = open("data/" + file_x + ".txt", 'r')
@@ -92,12 +75,12 @@ def normalize(data, is_multi):
     for arr in data:
         normalizer = []
         for i in range(arr.shape[1]):
-            arr[:, i] += np.random.normal(0, (max(arr[:, i]) - min(arr[:, i]))*0.001, len(arr[:, i]))
+            arr[:, i] += np.random.normal(0, (max(arr[:, i]) - min(arr[:, i])) * 0.001, len(arr[:, i]))
             m = min(arr[:, i])
-            mbig = max(arr[:, i])
-            normalizer.append([m, mbig])
+            m_big = max(arr[:, i])
+            normalizer.append([m, m_big])
             arr[:, i] -= m
-            arr[:, i] /= (mbig - m)
+            arr[:, i] /= (m_big - m)
     if is_multi:
         data[1] += 2
         data[1] = np.log(data[1])
@@ -111,7 +94,7 @@ def denormalize(data, normalizer):
             arr[i] += normalizer[0]
     return data
 
-
+'''
 def set_poly(mode, orders, numbers, x, is_multi):
     applier = None
     if mode == 'Chebyshev':
@@ -155,6 +138,43 @@ def set_poly(mode, orders, numbers, x, is_multi):
                 for i in range((orders[2])):
                     polynomial[k].append(np.log(min_poly + applier(i + 1, 2 * x[k][j] - 1)))
     return np.array(polynomial), min_poly
+'''
+
+
+def set_poly(kind, orders, numbers, x, is_multi):
+    if kind == 'Chebyshev':
+        apply = chebyshev
+    if kind == 'Legendre':
+        apply = legendre
+    if kind == 'Hermite':
+        apply = hermite
+    if kind == 'Laguerre':
+        apply = laguerre
+    polynomial = []
+    for k in range(x.shape[0]):
+        polynomial.append([])
+        for j in range(0, numbers[0]):
+            if j == 0:
+                polynomial[k].append(apply(0, 2 * x[k][j] - 1))
+            for i in range((orders[0])):
+                if is_multi:
+                    polynomial[k].append(np.log(2 + apply(i + 1, 2 * x[k][j] - 1)))
+                else:
+                    polynomial[k].append(apply(i + 1, 2 * x[k][j] - 1))
+        for j in range(numbers[0], numbers[1] + numbers[0]):
+            for i in range((orders[1])):
+                if is_multi:
+                    polynomial[k].append(np.log(2 + apply(i + 1, 2 * x[k][j] - 1)))
+                else:
+                    polynomial[k].append(apply(i + 1, 2 * x[k][j] - 1))
+        for j in range(numbers[1] + numbers[0], numbers[1] + numbers[0] + numbers[2]):
+            for i in range((orders[2])):
+                if is_multi:
+                    polynomial[k].append(np.log(2 + apply(i + 1, 2 * x[k][j] - 1)))
+                else:
+                    polynomial[k].append(apply(i + 1, 2 * x[k][j] - 1))
+    polynomial = np.array(polynomial)
+    return polynomial
 
 
 def fit(polynomial, y):
@@ -168,19 +188,19 @@ def predict(coefc, x, is_multi, min_poly=0):
 # new lab 4
 
 
-def form_data_animation(x, y, settings, build_window, forecast_window, mode):
+def form_data_animation(x, y, settings, build_window, forecast_window, kind):
     j = 0
     y2 = copy.copy(y)
     y1 = np.array([])
     for i in range(len(y2) - build_window):
         if i == j * forecast_window:
-            pol = set_poly(mode, settings[0], settings[1],
+            pol = set_poly(kind, settings[0], settings[1],
                            x[j * forecast_window: j * forecast_window + build_window], False)
             lambd = fit(pol, y2[j * forecast_window: j * forecast_window + build_window])  # j * build_window
 
             ind1 = j * forecast_window + build_window
             ind2 = min(len(x), (j + 1) * forecast_window + build_window)
-            predicted = predict(lambd, set_poly(mode, settings[0], settings[1], x[ind1:ind2], False)[0], False)
+            predicted = predict(lambd, set_poly(kind, settings[0], settings[1], x[ind1:ind2], False)[0], False)
 
             y1 = np.hstack((y1, predicted))
             j += 1

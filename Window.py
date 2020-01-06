@@ -1,7 +1,5 @@
-from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from PyQt5.QtCore import QThread, Qt, QRect
-from Solver import *
+from PyQt5.QtCore import Qt
 from Animations import *
 from functools import reduce
 
@@ -35,7 +33,7 @@ class UI(QDialog):
         self.RspinBox3 = QSpinBox()
         self.RspinBox2 = QSpinBox()
         self.RcomboBox = QComboBox()
-        self.topRightGroupBox = QGroupBox("Polynoms")
+        self.topMid2GroupBox = QGroupBox("Polynoms")
         self.results = QLabel()
         self.originalPalette = QApplication.palette()
         self.topLayout = QHBoxLayout()
@@ -47,25 +45,25 @@ class UI(QDialog):
         self.tabs = []
         self.create_top_left_group_box()
         self.create_top_mid_group_box()
-        self.create_top_mid2_group_box()
         self.create_top_right_group_box()
+        self.create_top_mid2_group_box()
         self.create_bottom_group_box()
         self.create_menu()
-        #
+
         self.canvas1 = MyMplCanvas(self, width=9, height=3, dpi=100, title='Y1')
         self.canvas2 = MyMplCanvas(self, width=6, height=3, dpi=100, title='Y2')
         self.canvas3 = MyMplCanvas(self, width=6, height=3, dpi=100, title='Y3')
         self.canvas4 = MyMplCanvas(self, width=6, height=3, dpi=100, title='Margin of tolerable risk')
         self.canvas5 = MyMplCanvas(self, width=6, height=3, dpi=100)
         self.graphs = [self.canvas1, self.canvas2, self.canvas3, self.canvas4, self.canvas5]
-        #
+
         self.mainLayout = QGridLayout()
 
         self.mainLayout.addLayout(self.topLayout, 1, 0, 1, 4)
         self.mainLayout.addWidget(self.topLeftGroupBox, 0, 0)
         self.mainLayout.addWidget(self.topMidGroupBox, 0, 1)
-        self.mainLayout.addWidget(self.topRightGroupBox, 0, 2)
-        self.mainLayout.addWidget(self.topMid2GroupBox, 0, 3)
+        self.mainLayout.addWidget(self.topMid2GroupBox, 0, 2)
+        self.mainLayout.addWidget(self.topRightGroupBox, 0, 3)
         self.mainLayout.addWidget(self.bottomTabWidget, 2, 0, 1, 4)
         self.mainLayout.addWidget(self.canvas1, 0, 4)
         self.mainLayout.addWidget(self.canvas2, 1, 4, 2, 1)
@@ -159,36 +157,6 @@ class UI(QDialog):
         self.topLeftGroupBox.setFixedWidth(260)
         self.topLeftGroupBox.setLayout(layout)
 
-    def create_top_right_group_box(self):
-
-        self.RcomboBox.addItems(["Chebyshev", "Hermite", "Legendre"])
-
-        self.RspinBox2.setRange(0, 1000)
-        self.inputs.append(self.RspinBox2)
-
-        self.RspinBox3.setRange(0, 1000)
-        self.inputs.append(self.RspinBox3)
-
-        self.RspinBox4.setRange(0, 1000)
-        self.inputs.append(self.RspinBox4)
-
-        layout = QGridLayout()
-
-        layout.addWidget(self.RcomboBox, 0, 1)
-        layout.addWidget(self.RspinBox2, 2, 1)
-        layout.addWidget(self.RspinBox3, 3, 1)
-        layout.addWidget(self.RspinBox4, 4, 1)
-
-        layout.addWidget(self.Rlabel1, 0, 0)
-        layout.addWidget(self.Rlabel4, 2, 0)
-        layout.addWidget(self.Rlabel5, 3, 0)
-        layout.addWidget(self.Rlabel6, 4, 0)
-
-        # self.topRightGroupBox.setFixedHeight(190)
-        self.topRightGroupBox.setFixedWidth(200)
-
-        self.topRightGroupBox.setLayout(layout)
-
     def create_top_mid_group_box(self):
 
         self.inputs.append(self.MspinBox1)
@@ -216,7 +184,37 @@ class UI(QDialog):
         self.topMidGroupBox.setLayout(layout)
 
     def create_top_mid2_group_box(self):
-        self.topMid2GroupBox = QGroupBox("Prognosis")
+
+        self.RcomboBox.addItems(["Chebyshev", "Hermite", "Legendre"])
+
+        self.RspinBox2.setRange(0, 1000)
+        self.inputs.append(self.RspinBox2)
+
+        self.RspinBox3.setRange(0, 1000)
+        self.inputs.append(self.RspinBox3)
+
+        self.RspinBox4.setRange(0, 1000)
+        self.inputs.append(self.RspinBox4)
+
+        layout = QGridLayout()
+
+        layout.addWidget(self.RcomboBox, 0, 1)
+        layout.addWidget(self.RspinBox2, 2, 1)
+        layout.addWidget(self.RspinBox3, 3, 1)
+        layout.addWidget(self.RspinBox4, 4, 1)
+
+        layout.addWidget(self.Rlabel1, 0, 0)
+        layout.addWidget(self.Rlabel4, 2, 0)
+        layout.addWidget(self.Rlabel5, 3, 0)
+        layout.addWidget(self.Rlabel6, 4, 0)
+
+        # self.topRightGroupBox.setFixedHeight(190)
+        self.topMid2GroupBox.setFixedWidth(200)
+
+        self.topMid2GroupBox.setLayout(layout)
+
+    def create_top_right_group_box(self):
+        self.topRightGroupBox = QGroupBox("Prognosis")
         self.speed_label = QLabel("Speed (meters per second)")
         self.speed = QSpinBox()
         self.per_label = QLabel("Period window")
@@ -243,9 +241,9 @@ class UI(QDialog):
         layout.addWidget(self.pro_label, 3, 0)
         layout.addWidget(self.adeq_label, 4, 0)
         # self.topMidGroupBox.setFixedHeight(190)
-        self.topMid2GroupBox.setFixedWidth(260)
+        self.topRightGroupBox.setFixedWidth(260)
 
-        self.topMid2GroupBox.setLayout(layout)
+        self.topRightGroupBox.setLayout(layout)
 
     def create_bottom_group_box(self):
         self.tab1hbox = QHBoxLayout()
@@ -261,20 +259,16 @@ class UI(QDialog):
                                                "              Danger level              ",
                                                "                Cause                "])
         self.Btable.resizeColumnsToContents()
-        #self.Btable.
         self.bottomTabWidget = QTabWidget()
-        #self.BtextEdit.setPlaceholderText("Here will be displayed the results after pressing 'Execute'\n")
-        #self.BtextEdit.setReadOnly(True)
 
         self.tab1hbox.setContentsMargins(5, 5, 5, 5)
         self.tab1hbox.addWidget(self.Btable)
 
         self.Btab1.setLayout(self.tab1hbox)
 
-        self.bottomTabWidget.addTab(self.Btab1, "Results")
+        self.bottomTabWidget.addTab(self.Btab1, "Parameters")
 
     def clr(self):
-        self.poly.setEnabled(True)
         self.Btable.clear()
         self.results.clear()
 
@@ -282,7 +276,6 @@ class UI(QDialog):
         values = [el.value() if type(el) != QLineEdit else el.text() for el in self.inputs]
         return values
 
-    # '''
     def execute(self):
         window_forecast = self.prognosis.value()
         window_build = self.period.value()
@@ -295,7 +288,7 @@ class UI(QDialog):
         file_y = parameters[1]
         file_x = parameters[2]
         is_multi = self.multi.isChecked()
-        data, normalizer = normalize(load_data(parameters[0], parameters[0], file_x, file_y), is_multi)
+        data, normalizer = normalize(load_data(parameters[0], file_x, file_y), is_multi)
         x, y = data
         print('x ' + str(x))
         print('y ' + str(y))
