@@ -96,18 +96,19 @@ def denormalize(data, normalizer):
 
 '''
 def set_poly(mode, orders, numbers, x, is_multi):
-    applier = None
-    if mode == 'Chebyshev':
-        applier = chebyshev
-    if mode == 'Legendre':
-        applier = legendre
-    if mode == 'Hermite':
-        applier = hermite
-    if mode == 'Laguerre':
-        applier = laguerre
-    polynomial = []
-    min_poly = None
-    for k in range(x.shape[0]):
+    
+    applier = None                                      print('x ' + str(x))
+    if mode == 'Chebyshev':                             print('y ' + str(y))
+        applier = chebyshev                             print('forecast ' + str(window_forecast))
+    if mode == 'Legendre':                              print('build ' + str(window_build))
+        applier = legendre                              print('speed ' + str(speed))
+    if mode == 'Hermite':                               print('kind ' + str(kind))
+        applier = hermite                               print('numbers ' + str(numbers))
+    if mode == 'Laguerre':                              print('orders ' + str(orders))
+        applier = laguerre                              print('y ' + str(file_y))
+    polynomial = []                                     print('x ' + str(file_x))
+    min_poly = None                                     print('multi ' + str(is_multi))
+    for k in range(x.shape[0]):                         print('parameters' + str(parameters))
         polynomial.append([])
         for j in range(0, numbers[0]):
             if j == 0:
@@ -138,6 +139,7 @@ def set_poly(mode, orders, numbers, x, is_multi):
                 for i in range((orders[2])):
                     polynomial[k].append(np.log(min_poly + applier(i + 1, 2 * x[k][j] - 1)))
     return np.array(polynomial), min_poly
+ 
 '''
 
 
@@ -185,9 +187,6 @@ def predict(coefc, x, is_multi, min_poly=0):
     return np.exp(x @ np.array(coefc).T - min_poly) if is_multi else x @ np.array(coefc).T
 
 
-# new lab 4
-
-
 def form_data_animation(x, y, settings, build_window, forecast_window, kind):
     j = 0
     y2 = copy.copy(y)
@@ -196,7 +195,7 @@ def form_data_animation(x, y, settings, build_window, forecast_window, kind):
         if i == j * forecast_window:
             pol = set_poly(kind, settings[0], settings[1],
                            x[j * forecast_window: j * forecast_window + build_window], False)
-            lambd = fit(pol, y2[j * forecast_window: j * forecast_window + build_window])  # j * build_window
+            lambd = fit(pol, y2[j * forecast_window: j * forecast_window + build_window])
 
             ind1 = j * forecast_window + build_window
             ind2 = min(len(x), (j + 1) * forecast_window + build_window)

@@ -4,7 +4,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from PyQt5.QtWidgets import *
 from Solver import *
-
+import time
 
 class MyMplCanvas(FigureCanvas):
     def __init__(self, parent=None, width=5, height=4, dpi=100, title=None):
@@ -22,11 +22,10 @@ class MyMplCanvas(FigureCanvas):
 class AnimationWidgets(QtWidgets.QWidget):
 
     def __init__(self, y_init, y_real, window, autoplay, filenumber, anim_speed, danger_levels, stop_func, start_func,
-                 result_table, num_of_y, normalizer, read_risks, datchicks, graphs):
-
+                 result_table, num_of_y, normalizer, read_risks, datchicks, graph):
+        super().__init__()
         self.playing = autoplay
-        self.canvas = MyMplCanvas(self, width=5, height=4, dpi=100)
-
+        self.canvas = graph
         self.datchicks = datchicks
         self.normalizer = normalizer
         self.num_of_y = num_of_y
@@ -54,7 +53,6 @@ class AnimationWidgets(QtWidgets.QWidget):
                                                     ]), range(len(risks)))))
         self.risk_management = (differences[1:] / risk_maxs) * self.window
         self.risk_exist = np.zeros(len(self.risk_management))
-        print(self.datchicks)
         if not read_risks:
             self.canvas.axes.set_ylim([min(self.y_real) * 0.9, max(self.y_real) * 1.1])
             for j in range(int(window / 2) + 5, len(self.risk_management) - int(window / 2)):
@@ -90,7 +88,6 @@ class AnimationWidgets(QtWidgets.QWidget):
             self.risk_management = (self.risk_management - min(self.risk_management)) / (
                         max(self.risk_management) - min(self.risk_management))
             self.canvas.axes.set_ylim([min(self.risk_management) * 0.9, max(self.risk_management) * 1.1])
-            self.canvas.axes.set_title("Запас допустимого риска")
 
         self.criteria, = self.canvas.axes.plot(self.x1[:1], self.risk_management[:1], animated=True, lw=1, color='red')
         f = open("data/history" + str(filenumber) + ".txt", 'r')
@@ -107,12 +104,9 @@ class AnimationWidgets(QtWidgets.QWidget):
         self.line, = self.canvas.axes.plot(self.x, self.y_fcast, animated=True, lw=1, color='orange')
         self.line2, = self.canvas.axes.plot(self.x1, self.min_val, animated=True, lw=1, color='blue')
         self.line3, = self.canvas.axes.plot(self.x, self.max_val, animated=True, lw=1, color='green')
-
-        self.ani = animation.FuncAnimation(
-            self.canvas.figure,
-            self.update_line,
-            blit=True, interval=anim_speed
-        )
+        if read_risks:
+            time.sleep(1.5)
+        self.ani = animation.FuncAnimation(self.canvas.figure, self.update_line, blit=True, interval=anim_speed)
 
     def update_line(self, i):
         try:

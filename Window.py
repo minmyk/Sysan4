@@ -113,7 +113,7 @@ class UI(QDialog):
         self.multi = QCheckBox("Multi")
         self.useStylePaletteCheckBox = QCheckBox("Light")
 
-        self.useStylePaletteCheckBox.setChecked(True)
+        self.useStylePaletteCheckBox.setChecked(False)
         self.multi.setChecked(False)
         self.reset.setFlat(True)
         self.resume.setFlat(True)
@@ -256,9 +256,12 @@ class UI(QDialog):
                                                "           У2           ",
                                                "           У3           ",
                                                "                            Status                            ",
-                                               "              Danger level              ",
-                                               "                Cause                "])
+                                               "             Danger level             ",
+                                               "               Cause               "])
         self.Btable.resizeColumnsToContents()
+        self.Btable.insertRow(0)
+        for i in range(7):
+            self.Btable.setItem(0, i, QTableWidgetItem(' '))
         self.bottomTabWidget = QTabWidget()
 
         self.tab1hbox.setContentsMargins(5, 5, 5, 5)
@@ -269,56 +272,43 @@ class UI(QDialog):
         self.bottomTabWidget.addTab(self.Btab1, "Parameters")
 
     def clr(self):
-        self.Btable.clear()
-        self.results.clear()
+        self.Btable.clearContents()
 
     def collect_data(self):
         values = [el.value() if type(el) != QLineEdit else el.text() for el in self.inputs]
         return values
 
     def execute(self):
-        window_forecast = self.prognosis.value()
-        window_build = self.period.value()
-        speed = self.speed.value()
+        window_forecast = 5  # self.prognosis.value()
+        window_build = 5  # self.period.value()
+        speed = 5  # self.speed.value()
         kind = self.RcomboBox.currentText()
         parameters = self.collect_data()
-        numbers = parameters[5:-3]
-        orders = parameters[-3:]
-        # clearButton
-        file_y = parameters[1]
-        file_x = parameters[2]
+        numbers = [3, 3, 3]  # parameters[5:-3]
+        orders = [4, 5, 6]  # parameters[-3:]
+        file_y = 'y'  # parameters[1]
+        file_x = 'x'  # parameters[2]
+        parameters[0] = 1200
+        parameters[4] = 3
         is_multi = self.multi.isChecked()
         data, normalizer = normalize(load_data(parameters[0], file_x, file_y), is_multi)
         x, y = data
-        print('x ' + str(x))
-        print('y ' + str(y))
-        print('forecast ' + str(window_forecast))
-        print('build ' + str(window_build))
-        print('speed ' + str(speed))
-        print('kind ' + str(kind))
-        print('numbers ' + str(numbers))
-        print('orders ' + str(orders))
-        print('y ' + str(file_y))
-        print('x ' + str(file_x))
-        print('multi ' + str(is_multi))
-        print('parameters' + str(parameters))
-        self.Btable.insertRow(0)
-        for i in range(7):
-            self.Btable.setItem(0, i, QTableWidgetItem('-'))
+
         arr = [[[11.7, 1e10], [11.5, 1e10]], [[4.1, 1e10], [0.5, 1e10]], [[11.85, 1e10], [11.80, 1e10]]]
         datchicks = indicator(y.T, window_forecast)
         datchicks = list(map(lambda k: [datchicks[k]] * window_forecast, range(len(datchicks))))
         datchicks = list(reduce(lambda a, b: a + b, datchicks))
-        print(datchicks)
+        print("tada")
+        print('parameters' + str(parameters))
         for i in range(parameters[4]):
             y1, y2 = form_data_animation(x, y[:, i], [orders, numbers], window_build, window_forecast, kind)
             y1, y2 = denormalize((y1, y2), normalizer[i])
-
             y2 = y2 + np.random.normal(0, 0.01 * (max(y2) - min(y2)), len(y2))
-            animation = AnimationWidgets(y1, y2, window_forecast, True, i, speed, arr[i], self.pause, self.resume,
-                                         self.Btable, parameters[6], normalizer[i], False, datchicks, self.graphs)
-            animation.show()
 
-        animation = AnimationWidgets(y1, y2, window_forecast, True, 3, speed, [[-1, 400]] * 4, self.pause, self.resume,
-                                     self.Btable, parameters[6], normalizer[i], True, datchicks, self.graphs)
-        animation.show()
+            animation = AnimationWidgets(y1, y2, window_forecast, True, i, speed, arr[i], self.pause, self.resume,
+                                         self.Btable, parameters[4], normalizer[i], False, datchicks, self.graphs[i])
+            animation.show()
+            print(i)
+        #animation = AnimationWidgets(y1, y2, window_forecast, True, 3, speed, [[-1, 400]] * 4, self.pause, self.resume,
+        #                             self.Btable, parameters[6], normalizer[i], True, datchicks, self.graphs[-1])
+        #animation.show()
