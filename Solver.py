@@ -1,7 +1,7 @@
 import numpy as np
 from itertools import combinations
 import copy
-
+np.set_printoptions(linewidth=np.inf)
 
 def memory_saver(f):
     memory = {}

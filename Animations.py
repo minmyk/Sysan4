@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import *
 from Solver import *
 import time
 
+
 class MyMplCanvas(FigureCanvas):
     def __init__(self, parent=None, width=5, height=4, dpi=100, title=None):
         fig = Figure(figsize=(width, height), dpi=dpi)
@@ -19,7 +20,7 @@ class MyMplCanvas(FigureCanvas):
         pass
 
 
-class AnimationWidgets():
+class Animation():
 
     def __init__(self, y_init, y_real, window, autoplay, filenumber, anim_speed, danger_levels, stop_func, start_func,
                  result_table, num_of_y, normalizer, read_risks, datchicks, graph):
@@ -87,7 +88,7 @@ class AnimationWidgets():
                         max(self.risk_management) - min(self.risk_management))
             self.canvas.axes.set_ylim([min(self.risk_management) * 0.9, max(self.risk_management) * 1.1])
 
-        self.criteria, = self.canvas.axes.plot(self.x1[:1], self.risk_management[:1], animated=True, lw=1, color='red')
+        self.criteria, = self.canvas.axes.plot(self.x1[:1], self.risk_management[:1], animated=True, lw=1, color='grey')
         f = open("data/history" + str(filenumber) + ".txt", 'r')
         readl = f.readline()
         self.data = np.array(list(map(lambda z: float(z), readl.strip().split())))
@@ -96,14 +97,12 @@ class AnimationWidgets():
         self.begin = 0
         self.index = len(self.data)
         self.i = 0
-        self.line_crazy, = self.canvas.axes.plot(self.x[:1], self.correl[:1], animated=True, lw=1, color='grey')
-        self.line_risk, = self.canvas.axes.plot(self.x1[:1], self.risk_exist[:1], animated=True, lw=2, color='grey')
-        self.line1, = self.canvas.axes.plot(self.x1, self.y_real, animated=True, lw=1, color='black')
-        self.line, = self.canvas.axes.plot(self.x, self.y_fcast, animated=True, lw=1, color='orange')
-        self.line2, = self.canvas.axes.plot(self.x1, self.min_val, animated=True, lw=1, color='blue')
-        self.line3, = self.canvas.axes.plot(self.x, self.max_val, animated=True, lw=1, color='green')
-        if not read_risks:
-            time.sleep(1.5)
+        self.line_crazy, = self.canvas.axes.plot(self.x[:1], self.correl[:1], animated=True, lw=0, color='white')
+        self.line_risk, = self.canvas.axes.plot(self.x1[:1], self.risk_exist[:1], animated=True, lw=0, color='white')
+        self.line1, = self.canvas.axes.plot(self.x1, self.y_real, animated=True, lw=1, color='green')
+        self.line, = self.canvas.axes.plot(self.x, self.y_fcast, animated=True, lw=1, color='red')
+        self.line2, = self.canvas.axes.plot(self.x1, self.min_val, animated=True, lw=1, color='brown')
+        self.line3, = self.canvas.axes.plot(self.x, self.max_val, animated=True, lw=1, color='blue')
         self.ani = animation.FuncAnimation(self.canvas.figure, self.update_line, blit=True, interval=anim_speed)
 
     def update_line(self, i):

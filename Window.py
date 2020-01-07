@@ -268,7 +268,15 @@ class UI(QDialog):
         self.bottomTabWidget.addTab(self.Btab1, "Parameters")
 
     def clr(self):
-        self.Btable.clearContents()
+        self.Btable.clear()
+        for i in range(4):
+            f = open("data/history" + str(i) + ".txt", 'w+')
+            f.write('')
+            f.close()
+        for i in range(3):
+            f = open("data/risks" + str(i) + ".txt", 'w+')
+            f.write('')
+            f.close()
 
     def collect_data(self):
         values = [el.value() if type(el) != QLineEdit else el.text() for el in self.inputs]
@@ -293,14 +301,22 @@ class UI(QDialog):
         datchicks = indicator(y.T, window_forecast)
         datchicks = list(map(lambda k: [datchicks[k]] * window_forecast, range(len(datchicks))))
         datchicks = list(reduce(lambda a, b: a + b, datchicks))
+        self.Btable.insertRow(0)
+        for i in range(7):
+            self.Btable.setItem(0, i, QTableWidgetItem('-'))
         y1, y2 = 0, 0
-        for i in range(parameters[4]):
-            y1, y2 = form_data_animation(x, y[:, i], [orders, numbers], window_build, window_forecast, kind)
-            y1, y2 = denormalize((y1, y2), normalizer[i])
-            y2 = y2 + np.random.normal(0, 0.01 * (max(y2) - min(y2)), len(y2))
-            print(i)
-            animation = AnimationWidgets(y1, y2, window_forecast, True, i, speed, arr[i], self.pause, self.resume,
-                                         self.Btable, parameters[4], normalizer[i], False, datchicks, self.graphs[i])
-        #animation = AnimationWidgets(y1, y2, window_forecast, True, 3, speed, [[-1, 400]] * 4, self.pause, self.resume,
-        #                             self.Btable, parameters[6], normalizer[i], True, datchicks, self.graphs[-1])
+        for i in range(parameters[4] + 1):
+            if i < 3:
+                y1, y2 = form_data_animation(x, y[:, i], [orders, numbers], window_build, window_forecast, kind)
+                y1, y2 = denormalize((y1, y2), normalizer[i])
+                y2 = y2 + np.random.normal(0, 0.01 * (max(y2) - min(y2)), len(y2))
+                print(i)
+                Animation(y1, y2, window_forecast, True, i, speed, arr[i], self.pause, self.resume,
+                          self.Btable, parameters[4], normalizer[i], False, datchicks, self.graphs[i])
+            else:
+                print(i)
+                Animation(y1, y2, window_forecast, True, 3, speed, [[-1, 400]] * 4, self.pause, self.resume,
+                          self.Btable, parameters[4], normalizer[2], True, datchicks, self.graphs[i])
+        #AnimationWidgets(y1, y2, window_forecast, True, 3, speed, [[-1, 400]] * 4, self.pause, self.resume,
+        #                 self.Btable, parameters[6], normalizer[i], True, datchicks, self.graphs[-1])
         #animation.show()
