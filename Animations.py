@@ -63,7 +63,7 @@ class Animation:
                         self.risk_exist[j] = max(self.y_real)
                     else:
                         self.risk_exist[j] = min(self.y_real) + 0.01
-            file = open("data/risks" + str(filenumber) + ".txt", 'w+')
+            file = open("data/program_data_r" + str(filenumber) + ".txt", 'w+')
             string = str(list(self.risk_management)).replace('[', '')
             string = string.replace(']', '')
             string = string.replace(',', '')
@@ -74,7 +74,7 @@ class Animation:
             self.risk_management = np.arange(len(risk_maxs))
             read_risks = np.zeros((self.num_of_y, len(self.risk_management)))
             for i in range(self.num_of_y):
-                file = open("data/risks" + str(i) + ".txt", 'r')
+                file = open("data/program_data_r" + str(i) + ".txt", 'r')
                 readl = file.readline()
                 read_risks[i] = np.array(list(map(lambda z: float(z), readl.strip().split())))
                 file.close()
@@ -85,7 +85,7 @@ class Animation:
             self.canvas.axes.set_ylim([min(self.risk_management) * 0.9, max(self.risk_management) * 1.1])
 
         self.criteria, = self.canvas.axes.plot(self.x1[:1], self.risk_management[:1], animated=True, lw=1, color='grey')
-        f = open("data/history" + str(filenumber) + ".txt", 'r')
+        f = open("data/program_data_h" + str(filenumber) + ".txt", 'r')
         readl = f.readline()
         self.data = np.array(list(map(lambda z: float(z), readl.strip().split())))
         self.y_fcast = np.append(self.data, self.y_fcast[len(self.data):])
@@ -99,7 +99,8 @@ class Animation:
         self.line, = self.canvas.axes.plot(self.x, self.y_fcast, animated=True, lw=1, color='red')
         self.line2, = self.canvas.axes.plot(self.x1, self.min_val, animated=True, lw=1, color='brown')
         self.line3, = self.canvas.axes.plot(self.x, self.max_val, animated=True, lw=1, color='blue')
-        self.ani = animation.FuncAnimation(self.canvas.figure, self.modify_plot, blit=True, interval=anim_speed)
+        self.ani = animation.FuncAnimation(self.canvas.figure, self.modify_plot, blit=True,
+                                           interval=abs(anim_speed - 100))
 
     def modify_plot(self, i):
         try:
@@ -107,7 +108,7 @@ class Animation:
                 self.stop_func.clicked.connect(self.stop_animation)
 
                 if self.index % self.window > self.window / 4:
-                    correl = crazylation(self.y_fcast[
+                    correl = get_correlation(self.y_fcast[
                                          min(len(self.data) + self.i - (len(self.data) + self.i) % self.window,
                                              len(self.y_fcast) - 1):
                                          min(len(self.y_fcast) - 1, len(self.data) + self.i)],
@@ -307,7 +308,7 @@ class Animation:
             string = str(list(self.y_fcast[:self.i + len(self.data)])).replace('[', '')
             string = string.replace(']', '')
             string = string.replace(',', '')
-            f = open("data/history" + str(self.filenumber) + ".txt", 'w+')
+            f = open("data/program_data_h" + str(self.filenumber) + ".txt", 'w+')
             if self.index >= len(self.y_fcast) - 1:
                 f.write('')
             else:

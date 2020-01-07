@@ -190,7 +190,7 @@ def predict(coefc, x, is_multi, min_poly=0):
     return np.exp(x @ np.array(coefc).T - min_poly) if is_multi else x @ np.array(coefc).T
 
 
-def form_data_animation(x, y, settings, build_window, forecast_window, kind):
+def create_animation(x, y, settings, build_window, forecast_window, kind):
     j = 0
     y2 = copy.copy(y)
     y1 = np.array([])
@@ -224,7 +224,7 @@ def get_variance(y):
     return sum(y1 ** 2)
 
 
-def crazylation(y, y_forecast):
+def get_correlation(y, y_forecast):
     y_mean = get_mean(y)
     forecast_mean = get_mean(y_forecast)
     y_centralized = y - y_mean
@@ -241,10 +241,10 @@ def indicator(y, window):
     indicator_fail = np.zeros((len(combinat), len(y[0]) // window - 1))
     for i in range(len(y[0]) // window - 2):
         for j in range(len(combinat)):
-            if crazylation(y[combinat[j][0]][i * window:(i + 1) * window],
-                           y[combinat[j][1]][i * window:(i + 1) * window]) * \
-                    crazylation(y[combinat[j][0]][(i + 1) * window:(i + 2) * window],
-                                y[combinat[j][1]][(i + 1) * window:(i + 2) * window]) < -1 * (2 / (window ** 1.15)):
+            if get_correlation(y[combinat[j][0]][i * window:(i + 1) * window],
+                               y[combinat[j][1]][i * window:(i + 1) * window]) * \
+                    get_correlation(y[combinat[j][0]][(i + 1) * window:(i + 2) * window],
+                                    y[combinat[j][1]][(i + 1) * window:(i + 2) * window]) < -1 * (2 / (window ** 1.15)):
                 indicator_fail[j][i] = 1
 
     ind = np.zeros(len(y[0]) // window - 1)

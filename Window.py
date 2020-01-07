@@ -273,11 +273,11 @@ class UI(QDialog):
     def clr(self):
         self.Btable.clear()
         for i in range(4):
-            f = open("data/history" + str(i) + ".txt", 'w+')
+            f = open("data/program_data_h" + str(i) + ".txt", 'w+')
             f.write('')
             f.close()
         for i in range(3):
-            f = open("data/risks" + str(i) + ".txt", 'w+')
+            f = open("data/program_data_r" + str(i) + ".txt", 'w+')
             f.write('')
             f.close()
         self.Btable.setColumnCount(7)
@@ -351,7 +351,7 @@ class UI(QDialog):
         animations = [0] * (parameters[4] + 2)
         for i in range(parameters[4] + 1):
             if i < 3:
-                y1, y2 = form_data_animation(x, y[:, i], [orders, numbers], window_build, window_forecast, kind)
+                y1, y2 = create_animation(x, y[:, i], [orders, numbers], window_build, window_forecast, kind)
                 y1, y2 = denormalize((y1, y2), normalizer[i])
                 y2 = y2 + np.random.normal(0, 0.01 * (max(y2) - min(y2)), len(y2))
                 animations[i] = Animation(y1, y2, window_forecast, True, i, speed, arr[i], self.pause, self.resume,
