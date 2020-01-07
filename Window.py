@@ -54,11 +54,11 @@ class UI(QDialog):
         self.create_bottom_group_box()
         self.create_menu()
 
-        self.canvas1 = MyMplCanvas(self, width=9, height=3, dpi=100, title='Y1')
-        self.canvas2 = MyMplCanvas(self, width=6, height=3, dpi=100, title='Y2')
-        self.canvas3 = MyMplCanvas(self, width=6, height=3, dpi=100, title='Y3')
-        self.canvas4 = MyMplCanvas(self, width=6, height=3, dpi=100, title='Margin of tolerable risk')
-        self.canvas5 = MyMplCanvas(self, width=6, height=3, dpi=100)
+        self.canvas1 = Graph(self, width=9, height=3, dpi=100, title='Y1')
+        self.canvas2 = Graph(self, width=6, height=3, dpi=100, title='Y2')
+        self.canvas3 = Graph(self, width=6, height=3, dpi=100, title='Y3')
+        self.canvas4 = Graph(self, width=6, height=3, dpi=100, title='Margin of tolerable risk')
+        self.canvas5 = Graph(self, width=6, height=3, dpi=100)
         self.graphs = [self.canvas1, self.canvas2, self.canvas3, self.canvas4, self.canvas5]
 
         self.mainLayout = QGridLayout()
@@ -329,9 +329,9 @@ class UI(QDialog):
         data, normalizer = normalize(load_data(parameters[0], file_x, file_y), is_multi)
         x, y = data
         arr = [[[11.7, 1e10], [11.5, 1e10]], [[4.1, 1e10], [0.5, 1e10]], [[11.85, 1e10], [11.80, 1e10]]]
-        datchicks = indicator(y.T, window_forecast)
-        datchicks = list(map(lambda k: [datchicks[k]] * window_forecast, range(len(datchicks))))
-        datchicks = list(reduce(lambda a, b: a + b, datchicks))
+        sensors = indicator(y.T, window_forecast)
+        sensors = list(map(lambda k: [sensors[k]] * window_forecast, range(len(sensors))))
+        sensors = list(reduce(lambda a, b: a + b, sensors))
 
         self.Btable.setColumnCount(7)
         self.Btable.setRowCount(0)
@@ -355,10 +355,10 @@ class UI(QDialog):
                 y1, y2 = denormalize((y1, y2), normalizer[i])
                 y2 = y2 + np.random.normal(0, 0.01 * (max(y2) - min(y2)), len(y2))
                 animations[i] = Animation(y1, y2, window_forecast, True, i, speed, arr[i], self.pause, self.resume,
-                                          self.Btable, parameters[4], normalizer[i], False, datchicks, self.graphs[i])
+                                          self.Btable, parameters[4], normalizer[i], False, sensors, self.graphs[i])
             else:
                 animations[i] = Animation(y1, y2, window_forecast, True, 3, speed, [[-1, 400]] * 4, self.pause,
-                                          self.resume, self.Btable, parameters[4], normalizer[2], True, datchicks,
+                                          self.resume, self.Btable, parameters[4], normalizer[2], True, sensors,
                                           self.graphs[i])
-            self.pause.clicked.connect(animations[i].stop_anim)
-            self.resume.clicked.connect(animations[i].start_anim)
+            self.pause.clicked.connect(animations[i].stop_animation)
+            self.resume.clicked.connect(animations[i].start_animation)

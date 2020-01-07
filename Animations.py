@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import *
 from Solver import *
 
 
-class MyMplCanvas(FigureCanvas):
+class Graph(FigureCanvas):
     def __init__(self, parent=None, width=5, height=4, dpi=100, title=None):
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
@@ -19,12 +19,11 @@ class MyMplCanvas(FigureCanvas):
 
 
 class Animation:
-
     def __init__(self, y_init, y_real, window, autoplay, filenumber, anim_speed, danger_levels, stop_func, start_func,
-                 result_table, num_of_y, normalizer, read_risks, datchicks, graph):
+                 result_table, num_of_y, normalizer, read_risks, sensors, graph):
         self.playing = autoplay
         self.canvas = graph
-        self.datchicks = datchicks
+        self.sensors = sensors
         self.normalizer = normalizer
         self.num_of_y = num_of_y
         self.read_risks = read_risks
@@ -79,7 +78,6 @@ class Animation:
                 readl = file.readline()
                 read_risks[i] = np.array(list(map(lambda z: float(z), readl.strip().split())))
                 file.close()
-                print('fffffff' + str(read_risks))
             for i in range(len(self.risk_management)):
                 self.risk_management[i] = min(read_risks[:, i])
             self.risk_management = (self.risk_management - min(self.risk_management)) / (
@@ -95,18 +93,18 @@ class Animation:
         self.begin = 0
         self.index = len(self.data)
         self.i = 0
-        self.line_crazy, = self.canvas.axes.plot(self.x[:1], self.correl[:1], animated=True, lw=0, color='white')
+        self.correlation, = self.canvas.axes.plot(self.x[:1], self.correl[:1], animated=True, lw=0, color='white')
         self.line_risk, = self.canvas.axes.plot(self.x1[:1], self.risk_exist[:1], animated=True, lw=0, color='white')
         self.line1, = self.canvas.axes.plot(self.x1, self.y_real, animated=True, lw=1, color='green')
         self.line, = self.canvas.axes.plot(self.x, self.y_fcast, animated=True, lw=1, color='red')
         self.line2, = self.canvas.axes.plot(self.x1, self.min_val, animated=True, lw=1, color='brown')
         self.line3, = self.canvas.axes.plot(self.x, self.max_val, animated=True, lw=1, color='blue')
-        self.ani = animation.FuncAnimation(self.canvas.figure, self.update_line, blit=True, interval=anim_speed)
+        self.ani = animation.FuncAnimation(self.canvas.figure, self.modify_plot, blit=True, interval=anim_speed)
 
-    def update_line(self, i):
+    def modify_plot(self, i):
         try:
             if self.playing and self.index < len(self.y_real):
-                self.stop_func.clicked.connect(self.stop_anim)
+                self.stop_func.clicked.connect(self.stop_animation)
 
                 if self.index % self.window > self.window / 4:
                     correl = crazylation(self.y_fcast[
@@ -141,7 +139,6 @@ class Animation:
                 for i in range(len(self.levels)):
                     alarms[i] = self.alarm(i + 1, variance, growth)
 
-                # TABLE
                 self.table_search()
 
             if not self.playing and self.begin < 1:
@@ -158,14 +155,9 @@ class Animation:
             if self.index >= len(self.y_real) - 2:
                 self.ani.event_source.interval = 1000
 
-            self.start_func.clicked.connect(self.start_anim)
+            self.start_func.clicked.connect(self.start_animation)
 
             if self.read_risks:
-                print("equals to " + str(self.datchicks[self.index]))
-                if self.datchicks[self.index] == 1:
-                    print("alarma - ha- hi- he- ho   " + str(self.index))
-                else:
-                    print("no alarma" + str(self.index))
                 self.criteria.set_ydata(self.risk_management[:self.index])
                 self.criteria.set_xdata(self.x1[:self.index])
 
@@ -175,8 +167,8 @@ class Animation:
                 return [self.criteria]
 
             else:
-                self.line_crazy.set_ydata(self.correl[:self.index])
-                self.line_crazy.set_xdata(self.x1[:self.index])
+                self.correlation.set_ydata(self.correl[:self.index])
+                self.correlation.set_xdata(self.x1[:self.index])
                 y = self.y_fcast[:min(len(self.y_fcast) - 1,
                                       len(self.data) + self.i - (len(self.data) + self.i) % self.window + self.window)]
                 x = self.x[:min(len(self.y_fcast) - 1,
@@ -191,7 +183,7 @@ class Animation:
                 self.line1.set_ydata(y1)
                 self.line1.set_xdata(x1)
 
-            return [self.line1, self.line, self.line3, self.line2, self.line_crazy]
+            return [self.line1, self.line, self.line3, self.line2, self.correlation]
 
         except IndexError:
             self.playing = False
@@ -202,12 +194,12 @@ class Animation:
             else:
                 return [self.line1, self.line, self.line3, self.line2]
 
-    def stop_anim(self):
+    def stop_animation(self):
         self.playing = True
         self.ani.event_source.stop()
 
-    def start_anim(self):
-        self.playing = False
+    def start_animation(self):
+        self.playing = True
         self.ani.event_source.start()
 
     def find_in_column(self, column_num, value):
