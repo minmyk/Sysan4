@@ -270,7 +270,7 @@ class Animation:
                 not_yet = 1
 
         if not_yet == 0 and self.table.item(row_num, 5).text() not in ['0', '-'] and \
-                self.table.item(row_num, 6).text()[-1] != 's':
+                self.table.item(row_num, 6).text()[-1] != ')':
             self.table.setItem(row_num, 6, QTableWidgetItem(self.table.item(row_num, 6).text() + ' parameter(s)'))
 
     def alarm(self, level, variance_, growth_):

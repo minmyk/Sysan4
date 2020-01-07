@@ -254,7 +254,7 @@ class UI(QDialog):
                                                "           У2           ",
                                                "           У3           ",
                                                "                      Status                      ",
-                                               "           Danger level            ",
+                                               "     Danger level      ",
                                                "               Cause               "])
         self.Btable.resizeColumnsToContents()
         self.Btable.horizontalHeader().setStretchLastSection(True)
@@ -287,7 +287,7 @@ class UI(QDialog):
                                                "           У2           ",
                                                "           У3           ",
                                                "                      Status                      ",
-                                               "           Danger level            ",
+                                               "     Danger level      ",
                                                "               Cause               "])
         self.Btable.resizeColumnsToContents()
         self.Btable.horizontalHeader().setStretchLastSection(True)
@@ -340,7 +340,7 @@ class UI(QDialog):
                                                "           У2           ",
                                                "           У3           ",
                                                "                      Status                      ",
-                                               "           Danger level            ",
+                                               "     Danger level      ",
                                                "               Cause               "])
         self.Btable.resizeColumnsToContents()
         self.Btable.horizontalHeader().setStretchLastSection(True)
