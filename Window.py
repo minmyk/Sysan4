@@ -113,8 +113,8 @@ class UI(QDialog):
         self.multi = QCheckBox("Multi")
         self.useStylePaletteCheckBox = QCheckBox("Light")
 
-        self.useStylePaletteCheckBox.setChecked(False)
-        self.multi.setChecked(False)
+        self.useStylePaletteCheckBox.setChecked(True)
+        self.multi.setChecked(True)
         self.reset.setFlat(True)
         self.resume.setFlat(True)
         self.pause.setFlat(True)
@@ -317,6 +317,3 @@ class UI(QDialog):
                 print(i)
                 Animation(y1, y2, window_forecast, True, 3, speed, [[-1, 400]] * 4, self.pause, self.resume,
                           self.Btable, parameters[4], normalizer[2], True, datchicks, self.graphs[i])
-        #AnimationWidgets(y1, y2, window_forecast, True, 3, speed, [[-1, 400]] * 4, self.pause, self.resume,
-        #                 self.Btable, parameters[6], normalizer[i], True, datchicks, self.graphs[-1])
-        #animation.show()
