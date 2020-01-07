@@ -80,6 +80,7 @@ class AnimationWidgets():
                 readl = file.readline()
                 read_risks[i] = np.array(list(map(lambda z: float(z), readl.strip().split())))
                 file.close()
+                print('fffffff' + str(read_risks))
             for i in range(len(self.risk_management)):
                 self.risk_management[i] = min(read_risks[:, i])
             self.risk_management = (self.risk_management - min(self.risk_management)) / (
@@ -100,7 +101,7 @@ class AnimationWidgets():
         self.line1, = self.canvas.axes.plot(self.x1, self.y_real, animated=True, lw=1, color='black')
         self.line, = self.canvas.axes.plot(self.x, self.y_fcast, animated=True, lw=1, color='orange')
         self.line2, = self.canvas.axes.plot(self.x1, self.min_val, animated=True, lw=1, color='blue')
-        self.line3, = self.canvas.axes.plot(self.x1, self.max_val, animated=True, lw=1, color='green')
+        self.line3, = self.canvas.axes.plot(self.x, self.max_val, animated=True, lw=1, color='green')
         if not read_risks:
             time.sleep(1.5)
         self.ani = animation.FuncAnimation(self.canvas.figure, self.update_line, blit=True, interval=anim_speed)

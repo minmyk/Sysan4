@@ -301,6 +301,6 @@ class UI(QDialog):
             print(i)
             animation = AnimationWidgets(y1, y2, window_forecast, True, i, speed, arr[i], self.pause, self.resume,
                                          self.Btable, parameters[4], normalizer[i], False, datchicks, self.graphs[i])
-        animation = AnimationWidgets(y1, y2, window_forecast, True, 3, speed, [[-1, 400]] * 4, self.pause, self.resume,
-                                     self.Btable, parameters[6], normalizer[i], True, datchicks, self.graphs[-1])
+        #animation = AnimationWidgets(y1, y2, window_forecast, True, 3, speed, [[-1, 400]] * 4, self.pause, self.resume,
+        #                             self.Btable, parameters[6], normalizer[i], True, datchicks, self.graphs[-1])
         #animation.show()
