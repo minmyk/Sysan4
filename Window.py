@@ -215,7 +215,7 @@ class UI(QDialog):
 
     def create_top_right_group_box(self):
         self.topRightGroupBox = QGroupBox("Prognosis")
-        self.speed_label = QLabel("Speed (meters per second)")
+        self.speed_label = QLabel("Display speed")
         self.speed = QSpinBox()
         self.per_label = QLabel("Period window")
         self.period = QSpinBox()
@@ -250,10 +250,11 @@ class UI(QDialog):
                                                "           У1           ",
                                                "           У2           ",
                                                "           У3           ",
-                                               "                            Status                            ",
+                                               "                      Status                      ",
                                                "             Danger level             ",
                                                "               Cause               "])
         self.Btable.resizeColumnsToContents()
+        self.Btable.horizontalHeader().setStretchLastSection(True)
         self.Btable.insertRow(0)
         for i in range(7):
             self.Btable.setItem(0, i, QTableWidgetItem(' '))
@@ -288,21 +289,18 @@ class UI(QDialog):
         is_multi = self.multi.isChecked()
         data, normalizer = normalize(load_data(parameters[0], file_x, file_y), is_multi)
         x, y = data
-
         arr = [[[11.7, 1e10], [11.5, 1e10]], [[4.1, 1e10], [0.5, 1e10]], [[11.85, 1e10], [11.80, 1e10]]]
         datchicks = indicator(y.T, window_forecast)
         datchicks = list(map(lambda k: [datchicks[k]] * window_forecast, range(len(datchicks))))
         datchicks = list(reduce(lambda a, b: a + b, datchicks))
-        print("tada")
-        print('parameters' + str(parameters))
+        y1, y2 = 0, 0
         for i in range(parameters[4]):
             y1, y2 = form_data_animation(x, y[:, i], [orders, numbers], window_build, window_forecast, kind)
             y1, y2 = denormalize((y1, y2), normalizer[i])
             y2 = y2 + np.random.normal(0, 0.01 * (max(y2) - min(y2)), len(y2))
-
+            print(i)
             animation = AnimationWidgets(y1, y2, window_forecast, True, i, speed, arr[i], self.pause, self.resume,
                                          self.Btable, parameters[4], normalizer[i], False, datchicks, self.graphs[i])
-            print(i)
-        #animation = AnimationWidgets(y1, y2, window_forecast, True, 3, speed, [[-1, 400]] * 4, self.pause, self.resume,
-        #                             self.Btable, parameters[6], normalizer[i], True, datchicks, self.graphs[-1])
+        animation = AnimationWidgets(y1, y2, window_forecast, True, 3, speed, [[-1, 400]] * 4, self.pause, self.resume,
+                                     self.Btable, parameters[6], normalizer[i], True, datchicks, self.graphs[-1])
         #animation.show()

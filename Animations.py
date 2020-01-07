@@ -78,12 +78,10 @@ class AnimationWidgets():
             for i in range(self.num_of_y):
                 file = open("data/risks" + str(i) + ".txt", 'r')
                 readl = file.readline()
-
                 read_risks[i] = np.array(list(map(lambda z: float(z), readl.strip().split())))
                 file.close()
             for i in range(len(self.risk_management)):
                 self.risk_management[i] = min(read_risks[:, i])
-
             self.risk_management = (self.risk_management - min(self.risk_management)) / (
                         max(self.risk_management) - min(self.risk_management))
             self.canvas.axes.set_ylim([min(self.risk_management) * 0.9, max(self.risk_management) * 1.1])
@@ -231,7 +229,6 @@ class AnimationWidgets():
     def table_search(self):
         row_num = self.find_in_column(0, str(self.index))
         if row_num >= 0:
-
             if not self.read_risks:
                 self.table.setItem(row_num, self.filenumber + 1, QTableWidgetItem(str(self.y_real[self.index])))
 
@@ -242,6 +239,7 @@ class AnimationWidgets():
                 self.table.setItem(0, self.filenumber + 1, QTableWidgetItem(str(self.y_real[self.index])))
             else:
                 self.table.setItem(0, 4, QTableWidgetItem("Безопасная ситуация."))
+
             for i in range(1, 7):
                 if i != self.filenumber + 1:
                     self.table.setItem(0, i, QTableWidgetItem("-"))
@@ -259,11 +257,11 @@ class AnimationWidgets():
                 self.table.setItem(row_num, 4, QTableWidgetItem('НС по 3 параметрам'))
                 self.table.setItem(row_num, 6, QTableWidgetItem(
                     self.table.item(row_num, 6).text() + '-й, ' + str(self.filenumber + 1)))
+
             elif self.table.item(row_num, 4).text()[-1] != 'я':
                 self.table.setItem(row_num, 5, QTableWidgetItem('1'))
                 self.table.setItem(row_num, 4, QTableWidgetItem('НС по 1 параметру'))
                 self.table.setItem(row_num, 6, QTableWidgetItem(str(self.filenumber + 1)))
-
         else:
             if self.table.item(row_num, 5).text() not in ['1', '2', '3'] and \
                     self.table.item(row_num, 4).text()[-1] != 'я':
@@ -273,13 +271,13 @@ class AnimationWidgets():
         if self.y_fcast[self.index] < self.levels[1][0]:
             self.table.setItem(row_num, 4, QTableWidgetItem('Авария'))
             self.table.setItem(row_num, 5, QTableWidgetItem('Максимальный'))
-
             self.table.setItem(row_num, 6, QTableWidgetItem(str(self.filenumber + 1) + '-й параметр'))
 
         not_yet = 0
         for i in range(self.num_of_y):
             if self.table.item(row_num, i + 1).text() == '-':
                 not_yet = 1
+
         if not_yet == 0 and self.table.item(row_num, 5).text() not in ['0', '-'] and \
                 self.table.item(row_num, 6).text()[-1] != 'р':
             self.table.setItem(row_num, 6, QTableWidgetItem(self.table.item(row_num, 6).text() + '-й параметр'))

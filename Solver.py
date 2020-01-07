@@ -193,17 +193,18 @@ def form_data_animation(x, y, settings, build_window, forecast_window, kind):
     y1 = np.array([])
     for i in range(len(y2) - build_window):
         if i == j * forecast_window:
-            pol = set_poly(kind, settings[0], settings[1],
-                           x[j * forecast_window: j * forecast_window + build_window], False)
+            pol = set_poly(kind, settings[0],
+                           settings[1], x[j * forecast_window: j * forecast_window + build_window], False)
+
             lambd = fit(pol, y2[j * forecast_window: j * forecast_window + build_window])
 
-            ind1 = j * forecast_window + build_window
-            ind2 = min(len(x), (j + 1) * forecast_window + build_window)
-            predicted = predict(lambd, set_poly(kind, settings[0], settings[1], x[ind1:ind2], False)[0], False)
+            predicted = predict(lambd, set_poly(kind, settings[0], settings[1],
+                                                x[j * forecast_window + build_window: min(len(x),
+                                                                                          (j+1) * forecast_window +
+                                                                                          build_window)], False), False)
 
             y1 = np.hstack((y1, predicted))
             j += 1
-
     return y1, y2[build_window:]
 
 
