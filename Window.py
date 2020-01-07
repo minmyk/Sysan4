@@ -7,6 +7,7 @@ from functools import reduce
 class UI(QDialog):
     def __init__(self, parent=None):
         super(UI, self).__init__(parent)
+
         self.Lline3 = QLineEdit()
         self.Lline2 = QLineEdit()
         self.Lline1 = QLineEdit()
@@ -16,6 +17,7 @@ class UI(QDialog):
         self.Llabel1 = QLabel("Sample size:")
         self.LspinBox = QSpinBox()
         self.topLeftGroupBox = QGroupBox("Data")
+
         self.Mlabel4 = QLabel("X3:")
         self.Mlabel3 = QLabel("X2:")
         self.Mlabel2 = QLabel("X1:")
@@ -25,6 +27,7 @@ class UI(QDialog):
         self.MspinBox2 = QSpinBox()
         self.MspinBox1 = QSpinBox()
         self.topMidGroupBox = QGroupBox("Dimensions")
+
         self.Rlabel6 = QLabel("X3 Power:")
         self.Rlabel5 = QLabel("X2 Power:")
         self.Rlabel4 = QLabel("X1 Power:")
@@ -34,6 +37,7 @@ class UI(QDialog):
         self.RspinBox2 = QSpinBox()
         self.RcomboBox = QComboBox()
         self.topMid2GroupBox = QGroupBox("Polynoms")
+
         self.results = QLabel()
         self.originalPalette = QApplication.palette()
         self.topLayout = QHBoxLayout()
@@ -106,8 +110,6 @@ class UI(QDialog):
             QApplication.setPalette(dark_palette)
 
     def create_menu(self):
-        self.resume = QPushButton("Resume")
-        self.pause = QPushButton("Pause")
         self.reset = QPushButton("Reset")
         self.run = QPushButton("Execute")
         self.multi = QCheckBox("Multi")
@@ -116,16 +118,12 @@ class UI(QDialog):
         self.useStylePaletteCheckBox.setChecked(True)
         self.multi.setChecked(True)
         self.reset.setFlat(True)
-        self.resume.setFlat(True)
-        self.pause.setFlat(True)
         self.run.setFlat(True)
 
         self.topLayout.addWidget(self.useStylePaletteCheckBox)
         self.topLayout.addWidget(self.multi)
         self.topLayout.addStretch(1)
         self.topLayout.addWidget(self.run)
-        self.topLayout.addWidget(self.resume)
-        self.topLayout.addWidget(self.pause)
         self.topLayout.addWidget(self.reset)
 
     def create_top_left_group_box(self):
@@ -154,7 +152,7 @@ class UI(QDialog):
         layout.addWidget(self.Lline3, 3, 1)
 
         # self.topLeftGroupBox.setFixedHeight(190)
-        self.topLeftGroupBox.setFixedWidth(260)
+        self.topLeftGroupBox.setFixedWidth(235)
         self.topLeftGroupBox.setLayout(layout)
 
     def create_top_mid_group_box(self):
@@ -221,8 +219,11 @@ class UI(QDialog):
         self.period = QSpinBox()
         self.pro_label = QLabel("Prognosis window")
         self.prognosis = QSpinBox()
-        # self.inputs.append(self.MspinBox4)
+        self.resume = QPushButton("Resume")
+        self.pause = QPushButton("Pause")
 
+        self.resume.setFlat(True)
+        self.pause.setFlat(True)
         self.speed.setRange(1, 100)
         self.period.setRange(1, 100)
         self.prognosis.setRange(1, 100)
@@ -235,8 +236,10 @@ class UI(QDialog):
         layout.addWidget(self.speed_label, 0, 0)
         layout.addWidget(self.per_label, 2, 0)
         layout.addWidget(self.pro_label, 3, 0)
+        layout.addWidget(self.resume, 4, 0)
+        layout.addWidget(self.pause, 4, 1)
         # self.topMidGroupBox.setFixedHeight(190)
-        self.topRightGroupBox.setFixedWidth(260)
+        self.topRightGroupBox.setFixedWidth(235)
 
         self.topRightGroupBox.setLayout(layout)
 
@@ -251,7 +254,7 @@ class UI(QDialog):
                                                "           У2           ",
                                                "           У3           ",
                                                "                      Status                      ",
-                                               "             Danger level             ",
+                                               "           Danger level            ",
                                                "               Cause               "])
         self.Btable.resizeColumnsToContents()
         self.Btable.horizontalHeader().setStretchLastSection(True)
@@ -277,12 +280,28 @@ class UI(QDialog):
             f = open("data/risks" + str(i) + ".txt", 'w+')
             f.write('')
             f.close()
+        self.Btable.setColumnCount(7)
+        self.Btable.setRowCount(0)
+        self.Btable.setHorizontalHeaderLabels(["     Time     ",
+                                               "           У1           ",
+                                               "           У2           ",
+                                               "           У3           ",
+                                               "                      Status                      ",
+                                               "           Danger level            ",
+                                               "               Cause               "])
+        self.Btable.resizeColumnsToContents()
+        self.Btable.horizontalHeader().setStretchLastSection(True)
+        self.Btable.insertRow(0)
+        for i in range(7):
+            self.Btable.setItem(0, i, QTableWidgetItem(' '))
 
     def collect_data(self):
         values = [el.value() if type(el) != QLineEdit else el.text() for el in self.inputs]
         return values
 
     def execute(self):
+
+        """
         window_forecast = 5  # self.prognosis.value()
         window_build = 5  # self.period.value()
         speed = 5  # self.speed.value()
@@ -292,8 +311,20 @@ class UI(QDialog):
         orders = [4, 5, 6]  # parameters[-3:]
         file_y = 'y'  # parameters[1]
         file_x = 'x'  # parameters[2]
-        parameters[0] = 1200
+        parameters[0] = 1000
         parameters[4] = 3
+        
+        """  # for testing
+
+        window_forecast = self.prognosis.value()
+        window_build = self.period.value()
+        speed = self.speed.value()
+        kind = self.RcomboBox.currentText()
+        parameters = self.collect_data()
+        numbers = parameters[5:-3]
+        orders = parameters[-3:]
+        file_y = parameters[1]
+        file_x = parameters[2]
         is_multi = self.multi.isChecked()
         data, normalizer = normalize(load_data(parameters[0], file_x, file_y), is_multi)
         x, y = data
@@ -301,19 +332,33 @@ class UI(QDialog):
         datchicks = indicator(y.T, window_forecast)
         datchicks = list(map(lambda k: [datchicks[k]] * window_forecast, range(len(datchicks))))
         datchicks = list(reduce(lambda a, b: a + b, datchicks))
+
+        self.Btable.setColumnCount(7)
+        self.Btable.setRowCount(0)
+        self.Btable.setHorizontalHeaderLabels(["     Time     ",
+                                               "           У1           ",
+                                               "           У2           ",
+                                               "           У3           ",
+                                               "                      Status                      ",
+                                               "           Danger level            ",
+                                               "               Cause               "])
+        self.Btable.resizeColumnsToContents()
+        self.Btable.horizontalHeader().setStretchLastSection(True)
         self.Btable.insertRow(0)
         for i in range(7):
-            self.Btable.setItem(0, i, QTableWidgetItem('-'))
+            self.Btable.setItem(0, i, QTableWidgetItem(' '))
         y1, y2 = 0, 0
+        animations = [0] * (parameters[4] + 2)
         for i in range(parameters[4] + 1):
             if i < 3:
                 y1, y2 = form_data_animation(x, y[:, i], [orders, numbers], window_build, window_forecast, kind)
                 y1, y2 = denormalize((y1, y2), normalizer[i])
                 y2 = y2 + np.random.normal(0, 0.01 * (max(y2) - min(y2)), len(y2))
-                print(i)
-                Animation(y1, y2, window_forecast, True, i, speed, arr[i], self.pause, self.resume,
-                          self.Btable, parameters[4], normalizer[i], False, datchicks, self.graphs[i])
+                animations[i] = Animation(y1, y2, window_forecast, True, i, speed, arr[i], self.pause, self.resume,
+                                          self.Btable, parameters[4], normalizer[i], False, datchicks, self.graphs[i])
             else:
-                print(i)
-                Animation(y1, y2, window_forecast, True, 3, speed, [[-1, 400]] * 4, self.pause, self.resume,
-                          self.Btable, parameters[4], normalizer[2], True, datchicks, self.graphs[i])
+                animations[i] = Animation(y1, y2, window_forecast, True, 3, speed, [[-1, 400]] * 4, self.pause,
+                                          self.resume, self.Btable, parameters[4], normalizer[2], True, datchicks,
+                                          self.graphs[i])
+            self.pause.clicked.connect(animations[i].stop_anim)
+            self.resume.clicked.connect(animations[i].start_anim)

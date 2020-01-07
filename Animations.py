@@ -1,10 +1,8 @@
 from matplotlib import animation as animation
-from PyQt5 import QtWidgets
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from PyQt5.QtWidgets import *
 from Solver import *
-import time
 
 
 class MyMplCanvas(FigureCanvas):
@@ -20,7 +18,7 @@ class MyMplCanvas(FigureCanvas):
         pass
 
 
-class Animation():
+class Animation:
 
     def __init__(self, y_init, y_real, window, autoplay, filenumber, anim_speed, danger_levels, stop_func, start_func,
                  result_table, num_of_y, normalizer, read_risks, datchicks, graph):
@@ -129,13 +127,10 @@ class Animation():
                                              len(self.y_fcast) - 1): min(max(0, self.index - 1), len(self.y_fcast))]
                 if len(moved_pos) == len(moved_neg):
                     differences = moved_pos - moved_neg
-                    growth_rate = crazylation(moved_pos, moved_neg)
 
                 else:
                     differences = moved_pos[:min(len(moved_pos), len(moved_neg))] - moved_neg[:min(len(moved_pos),
                                                                                                    len(moved_neg))]
-                    growth_rate = crazylation(moved_pos[:min(len(moved_pos), len(moved_neg))],
-                                              moved_neg[:min(len(moved_pos), len(moved_neg))])
 
                 growth = get_mean(differences)
                 variance = 1. / (self.window - 1) * get_variance(
@@ -158,7 +153,6 @@ class Animation():
 
             if self.begin == 1:
                 self.playing = True
-                self.stop_button.click()
                 self.ani.event_source.stop()
 
             if self.index >= len(self.y_real) - 2:
@@ -210,12 +204,10 @@ class Animation():
 
     def stop_anim(self):
         self.playing = True
-        self.stop_button.click()
         self.ani.event_source.stop()
 
     def start_anim(self):
         self.playing = False
-        self.start_button.click()
         self.ani.event_source.start()
 
     def find_in_column(self, column_num, value):
@@ -230,7 +222,7 @@ class Animation():
         number = self.filenumber + 1
         if number == 1:
             number = '1st'
-        elif number ==2:
+        elif number == 2:
             number = '2nd'
         else:
             number = '3rd'
@@ -334,6 +326,7 @@ class Animation():
         else:
             pass
 
-    def closeEvent(self, event):
+    @staticmethod
+    def close_event(event):
 
         event.accept()

@@ -3,6 +3,7 @@ from itertools import combinations
 import copy
 np.set_printoptions(linewidth=np.inf)
 
+
 def memory_saver(f):
     memory = {}
 
@@ -94,6 +95,7 @@ def denormalize(data, normalizer):
             arr[i] += normalizer[0]
     return data
 
+
 '''
 def set_poly(mode, orders, numbers, x, is_multi):
     
@@ -144,6 +146,7 @@ def set_poly(mode, orders, numbers, x, is_multi):
 
 
 def set_poly(kind, orders, numbers, x, is_multi):
+    apply = None
     if kind == 'Chebyshev':
         apply = chebyshev
     if kind == 'Legendre':
