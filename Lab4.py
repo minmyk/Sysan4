@@ -825,7 +825,7 @@ def fit(polynomial, y):
 
 
 def predict(coefc, x, is_multi, min_poly=0):
-    return np.exp(x @ np.array(coefc).T - min_poly) if is_multi else x @ np.array(coefc).T
+    return np.exp(np.dot(x, np.array(coefc).T - min_poly)) if is_multi else np.dot(x, np.array(coefc).T)
 
 
 def create_animation(x, y, settings, build_window, forecast_window, kind):
@@ -867,7 +867,7 @@ def get_correlation(y, y_forecast):
     forecast_mean = get_mean(y_forecast)
     y_centralized = y - y_mean
     y_forecast_centralized = y_forecast - forecast_mean
-    result = y_centralized @ y_forecast_centralized
+    result = np.dot(y_centralized, y_forecast_centralized)
     correlation = np.sqrt(get_variance(y) * get_variance(y_forecast))
     if correlation == 0:
         return 0
