@@ -58,7 +58,7 @@ class UI(QDialog):
         self.canvas2 = Graph(self, width=6, height=3, dpi=100, title='Y2')
         self.canvas3 = Graph(self, width=6, height=3, dpi=100, title='Y3')
         self.canvas4 = Graph(self, width=6, height=3, dpi=100, title='Margin of tolerable risk')
-        self.canvas5 = Graph(self, width=6, height=3, dpi=100)
+        self.canvas5 = Graph(self, width=6, height=3, dpi=100, title='Margin of tolerable risk (S)')
         self.graphs = [self.canvas1, self.canvas2, self.canvas3, self.canvas4, self.canvas5]
 
         self.mainLayout = QGridLayout()
@@ -315,7 +315,7 @@ class UI(QDialog):
         parameters[4] = 3
         
         """  # for testing
-
+        self.useStylePaletteCheckBox.setEnabled(False)
         window_forecast = self.prognosis.value()
         window_build = self.period.value()
         speed = self.speed.value()
@@ -349,16 +349,16 @@ class UI(QDialog):
             self.Btable.setItem(0, i, QTableWidgetItem(' '))
         y1, y2 = 0, 0
         animations = [0] * (parameters[4] + 2)
-        for i in range(parameters[4] + 1):
+        for i in range(parameters[4] + 2):
             if i < 3:
                 y1, y2 = create_animation(x, y[:, i], [orders, numbers], window_build, window_forecast, kind)
                 y1, y2 = denormalize((y1, y2), normalizer[i])
                 y2 = y2 + np.random.normal(0, 0.01 * (max(y2) - min(y2)), len(y2))
                 animations[i] = Animation(y1, y2, window_forecast, True, i, speed, arr[i], self.pause, self.resume,
-                                          self.Btable, parameters[4], normalizer[i], False, sensors, self.graphs[i])
+                                          self.Btable, parameters[4], normalizer[i], False, sensors, self.graphs[i], i)
             else:
                 animations[i] = Animation(y1, y2, window_forecast, True, 3, speed, [[-1, 400]] * 4, self.pause,
                                           self.resume, self.Btable, parameters[4], normalizer[2], True, sensors,
-                                          self.graphs[i])
+                                          self.graphs[i], i)
             self.pause.clicked.connect(animations[i].stop_animation)
             self.resume.clicked.connect(animations[i].start_animation)

@@ -1,6 +1,7 @@
 import numpy as np
 from itertools import combinations
 import copy
+from scipy.stats import spearmanr
 np.set_printoptions(linewidth=np.inf)
 
 
@@ -234,6 +235,10 @@ def get_correlation(y, y_forecast):
     if correlation == 0:
         return 0
     return result / correlation
+
+
+def get_sp_correlation(y, y_forecast):
+    return spearmanr(y, y_forecast)[0]
 
 
 def indicator(y, window):

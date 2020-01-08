@@ -20,7 +20,7 @@ class Graph(FigureCanvas):
 
 class Animation:
     def __init__(self, y_init, y_real, window, autoplay, filenumber, anim_speed, danger_levels, stop_func, start_func,
-                 result_table, num_of_y, normalizer, read_risks, sensors, graph):
+                 result_table, num_of_y, normalizer, read_risks, sensors, graph, ind):
         self.playing = autoplay
         self.canvas = graph
         self.sensors = sensors
@@ -40,7 +40,7 @@ class Animation:
         self.max_val = np.ones((len(y_real))) * danger_levels[1][0]
         self.correl = np.zeros((len(y_real)))
         self.filenumber = filenumber
-
+        self.ind = ind
         risks = abs(self.y_real[1:] - self.y_real[:-1])
         differences = np.vstack((abs(self.y_real - self.min_val), abs(self.y_real - self.max_val)))
         differences = np.array(list(map(lambda a: min(differences[0][a], differences[1][a]),
@@ -108,14 +108,26 @@ class Animation:
                 self.stop_func.clicked.connect(self.stop_animation)
 
                 if self.index % self.window > self.window / 4:
-                    correl = get_correlation(self.y_fcast[
-                                         min(len(self.data) + self.i - (len(self.data) + self.i) % self.window,
-                                             len(self.y_fcast) - 1):
-                                         min(len(self.y_fcast) - 1, len(self.data) + self.i)],
-                                         self.y_real[
-                                         min(max(0, len(self.data) + self.i - (len(self.data) + self.i) % self.window),
-                                             len(self.y_fcast) - 1):
-                                         min(len(self.y_fcast) - 1, len(self.data) + self.i)])
+                    if self.ind != 4:
+                        correl = get_correlation(self.y_fcast[
+                                             min(len(self.data) + self.i - (len(self.data) + self.i) % self.window,
+                                                 len(self.y_fcast) - 1):
+                                             min(len(self.y_fcast) - 1, len(self.data) + self.i)],
+                                             self.y_real[
+                                             min(max(0, len(self.data) + self.i - (len(self.data) + self.i) %
+                                                     self.window),
+                                                 len(self.y_fcast) - 1):
+                                             min(len(self.y_fcast) - 1, len(self.data) + self.i)])
+                    else:
+                        correl = get_sp_correlation(self.y_fcast[
+                                             min(len(self.data) + self.i - (len(self.data) + self.i) % self.window,
+                                                 len(self.y_fcast) - 1):
+                                             min(len(self.y_fcast) - 1, len(self.data) + self.i)],
+                                             self.y_real[
+                                             min(max(0, len(self.data) + self.i - (len(self.data) + self.i) %
+                                                     self.window),
+                                                 len(self.y_fcast) - 1):
+                                             min(len(self.y_fcast) - 1, len(self.data) + self.i)])
                 else:
                     correl = 0
                 self.correl[min(len(self.y_fcast) - 1, self.index)] = correl * (
