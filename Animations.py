@@ -80,10 +80,11 @@ class Animation:
                 file.close()
             for i in range(len(self.risk_management)):
                 self.risk_management[i] = min(read_risks[:, i])
-            self.risk_management = (self.risk_management - min(self.risk_management)) / (
-                        max(self.risk_management) - min(self.risk_management))
+            self.risk_management = ((self.risk_management - min(self.risk_management)) / (
+                        max(self.risk_management) - min(self.risk_management)))
+            if self.ind == 4:
+                self.risk_management *= np.random.normal(1, 0.1, len(self.risk_management))
             self.canvas.axes.set_ylim([min(self.risk_management) * 0.9, max(self.risk_management) * 1.1])
-
         self.criteria, = self.canvas.axes.plot(self.x1[:1], self.risk_management[:1], animated=True, lw=1, color='grey')
         f = open("data/program_data_h" + str(filenumber) + ".txt", 'r')
         readl = f.readline()
